@@ -41,3 +41,26 @@ Android 12+ can show a short system splash when launching the app even though th
 - Configurable 65ms vibration, tone and high-importance short-lived notifications. System permission and phone notification channel settings determine whether a heads-up banner appears.
 - Two-column statistics and compact daily history.
 - Before updating a v0.1.0 debug APK, export a JSON backup from Settings. Runner-generated debug signing certificates may vary; uninstalling the old build deletes its local data.
+
+## v0.3.0
+- Modern rounded theme-aware dialogs and hourly breakdown (first recorded hour to last, zero-filled gaps).
+- Adjustable double-launch window (1–60 seconds, default 1 second).
+- Optional continuous counting mode (open dashboard after every Nth tap, N = 2–1000); all taps count.
+- Random reward draws with 1/N per-tap probability, a guaranteed win on the Nth unsuccessful tap, configurable N and reward points, and a distinct double-vibration/notification.
+- Optional low-priority ongoing notification showing the current counter, updated when the counter changes.
+- Persistent reward/periodic state stored in SQLite; v0.2.x data upgraded in place when signatures match.
+
+## Private signing (IMPORTANT)
+The signing keystore is intentionally **not committed**. The owner holds a private TXT containing a base64 PKCS12 keystore and its passwords.
+Go to **Settings → Secrets and variables → Actions → New repository secret**, and create:
+- `TAPCOUNT_KEYSTORE_BASE64`
+- `TAPCOUNT_KEYSTORE_PASSWORD`
+- `TAPCOUNT_KEY_ALIAS`
+- `TAPCOUNT_KEY_PASSWORD`
+
+Once all four are configured, go to **Actions → Build Android APK → Run workflow (main)**.
+Only successfully signed builds will be uploaded as `tapcount-release-signed-apk` and published in GitHub Releases. No debug APK is published as an official release when secrets are absent.
+
+The **first switch** from a v0.2.x debug APK to the new production certificate cannot be installed over the old certificate. Export a JSON backup from the old app, uninstall it, install v0.3.0 signed, then import the backup. Later signed APKs using the *same* private key can update in place.
+
+Keep the private TXT and its contents out of issues, Git commits, logs, chat screenshots, and repository files. The private key must remain private.

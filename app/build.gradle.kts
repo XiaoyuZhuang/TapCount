@@ -11,8 +11,8 @@ android {
         applicationId = "com.xiaoyuzhuang.tapcount"
         minSdk = 26
         targetSdk = 34
-        versionCode = 3
-        versionName = "0.2.1"
+        versionCode = 4
+        versionName = "0.3.0"
     }
     buildFeatures { buildConfig = true }
     compileOptions {
@@ -31,6 +31,7 @@ android {
             create("production") {
                 storeFile = file(keyPath)
                 storePassword = keyPassword
+                storeType = "PKCS12"
                 this.keyAlias = keyAlias
                 this.keyPassword = keyPass
             }
