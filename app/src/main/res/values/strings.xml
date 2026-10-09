@@ -91,7 +91,7 @@
     <string name="periodic_interval">Open dashboard every</string>
     <string name="seconds_unit">%1$d s</string>
     <string name="taps_unit">%1$d taps</string>
-    <string name="periodic_explainer">Double-tap mode opens the dashboard on the second tap (no extra point). In periodic mode every tap counts; the Nth tap also opens the dashboard.</string>
+    <string name="periodic_explainer">Double-tap: second tap within the interval opens management without another point. Every N taps: the Nth tap also opens management. Via notification: every tap only counts; tap the ongoing notification to open Settings.</string>
     <string name="bonus_settings">Random rewards</string>
     <string name="bonus_enabled">Enable random rewards</string>
     <string name="bonus_pity">Guaranteed reward after</string>
@@ -124,4 +124,8 @@
     <string name="history_date_range">%1$s – %2$s</string>
     <string name="history_to_today">Return to today</string>
     <string name="today_no_events">No events yet today</string>
+    <string name="notification_mode">Enter via notification</string>
+    <string name="notification_mode_disabled">Notifications are disabled for TapCount. Enable app notifications in your Android system settings before selecting this mode. Double-tap mode remains available.</string>
+    <string name="notification_mode_permission_required">Allow notifications to activate notification-only entry. Your previous entry mode has been kept.</string>
+    <string name="notification_mode_requires_persistent">Keep the ongoing notification enabled when using notification-only entry.</string>
 </resources>

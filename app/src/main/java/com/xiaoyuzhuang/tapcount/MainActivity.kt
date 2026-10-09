@@ -2,6 +2,7 @@ package com.xiaoyuzhuang.tapcount
 
 import android.Manifest
 import android.app.Activity
+import android.app.NotificationManager
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
@@ -18,6 +19,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.HorizontalScrollView
 import android.widget.ScrollView
 import android.widget.Switch
 import android.widget.TextView
@@ -35,6 +37,7 @@ class MainActivity : Activity() {
     private var days = 7
     private var historyEnd: LocalDate = LocalDate.now()
     private var isDark = false
+    private var pendingNotificationEntry = false
 
     private val bg get() = if (isDark) Color.rgb(17, 21, 30) else Color.rgb(246, 248, 252)
     private val surface get() = if (isDark) Color.rgb(34, 41, 55) else Color.WHITE
@@ -88,6 +91,17 @@ class MainActivity : Activity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 100 && grantResults.any { it == PackageManager.PERMISSION_GRANTED })
             Feedback.refreshPersistent(applicationContext,store.activeProject().count)
+        if (requestCode == 101) {
+            val granted = grantResults.isNotEmpty() &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED
+            if (pendingNotificationEntry && granted) {
+                pendingNotificationEntry = false
+                selectNotificationEntry()
+            } else {
+                pendingNotificationEntry = false
+                toast(getString(R.string.notification_mode_permission_required))
+            }
+        }
     }
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
@@ -193,14 +207,52 @@ class MainActivity : Activity() {
         val date = LocalDate.now().toString()
         val hourly = store.hourly(project.id, date)
 
-        // The first content on Home is today's points earned per hour.
+        // The daily hourly-points chart stays at the top, with compact feedback.
+        val scores = store.recent(project.id, 2)
+        val yesterday = scores.first().count
+        val today = scores.last().count
+        val difference = today - yesterday
         val chart = card()
         chart.addView(txt(getString(R.string.today_hour_points), 16f, true))
+        val compare = row().apply { setPadding(0,dp(9),0,dp(9)) }
+        fun summaryCell(label: String, value: String, highlighted: Boolean): LinearLayout {
+            return column().apply {
+                val backgroundColor = if (isDark) Color.rgb(43, 53, 70)
+                    else Color.rgb(241, 245, 252)
+                background=round(backgroundColor,10)
+                setPadding(dp(9),dp(8),dp(9),dp(8))
+                addView(txt(label,11f,false,muted))
+                addView(txt(value,18f,true,if (highlighted) primary else fg))
+            }
+        }
+        val summary = listOf(
+            getString(R.string.today) to today.toString(),
+            getString(R.string.yesterday) to yesterday.toString(),
+            getString(R.string.day_difference) to
+                ((if (difference>=0) "+" else "") + difference)
+        )
+        summary.forEachIndexed { i, pair ->
+            compare.addView(summaryCell(pair.first,pair.second,i==2),
+                LinearLayout.LayoutParams(0,ViewGroup.LayoutParams.WRAP_CONTENT,1f)
+                    .apply { if (i<2) rightMargin=dp(6) })
+        }
+        chart.addView(compare)
         if (hourly.isEmpty()) {
-            chart.addView(txt(getString(R.string.today_no_events), 13f, false, muted),
-                LinearLayout.LayoutParams(-1,-2).apply { topMargin=dp(12); bottomMargin=dp(8) })
+            chart.addView(txt(getString(R.string.today_no_events),13f,false,muted),
+                LinearLayout.LayoutParams(-1,-2).apply {
+                    topMargin=dp(8); bottomMargin=dp(8)
+                })
         } else {
-            chart.addView(HourlyChart(this, hourly, isDark, true))
+            // A long active day can include up to 24 hours. Maintain readable
+            // numbers rather than squeezing all labels into tiny columns.
+            val scroller=HorizontalScrollView(this).apply {
+                isFillViewport=true
+                isHorizontalScrollBarEnabled=hourly.size>9
+            }
+            scroller.addView(HourlyChart(this,hourly,isDark,true),
+                android.widget.FrameLayout.LayoutParams(
+                    dp((hourly.size*38).coerceAtLeast(275)),dp(146)))
+            chart.addView(scroller)
         }
 
         val logCard = card()
@@ -456,15 +508,48 @@ class MainActivity : Activity() {
         parent.addView(r)
     }
 
+    private fun notificationAvailable(): Boolean {
+        val manager = getSystemService(NotificationManager::class.java)
+        return manager.areNotificationsEnabled()
+    }
+
+    private fun selectNotificationEntry() {
+        if (!notificationAvailable()) {
+            StyledDialogs.message(this,getString(R.string.notification_mode),
+                getString(R.string.notification_mode_disabled))
+            return
+        }
+        // Notification-only mode must have a persistent, tappable way back
+        // to the management screen even with transient feedback disabled.
+        UiPrefs.setBool(this,"persistent_notification",true)
+        UiPrefs.setText(this,"entry_mode","notification")
+        getSharedPreferences("tapcount",Context.MODE_PRIVATE).edit()
+            .putLong("last_launch_elapsed",0L).apply()
+        Feedback.refreshPersistent(applicationContext,store.activeProject().count)
+        render()
+    }
+
     private fun choose(title: String, labels: Array<String>,
                        values: Array<String>, key: String) {
         StyledDialogs.options(this,title,labels) { index ->
-            UiPrefs.setText(this,key,values[index])
-            if (key=="entry_mode") {
-                getSharedPreferences("tapcount", Context.MODE_PRIVATE).edit()
-                    .putLong("last_launch_elapsed",0L).apply()
+            val selected = values[index]
+            if (key=="entry_mode" && selected=="notification") {
+                if (Build.VERSION.SDK_INT>=33 &&
+                    checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+                        PackageManager.PERMISSION_GRANTED) {
+                    pendingNotificationEntry=true
+                    requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS),101)
+                } else {
+                    selectNotificationEntry()
+                }
+            } else {
+                UiPrefs.setText(this,key,selected)
+                if (key=="entry_mode") {
+                    getSharedPreferences("tapcount",Context.MODE_PRIVATE).edit()
+                        .putLong("last_launch_elapsed",0L).apply()
+                }
+                if (key=="theme" || key=="language") recreate() else render()
             }
-            if (key=="theme" || key=="language") recreate() else render()
         }
     }
 
@@ -491,29 +576,40 @@ class MainActivity : Activity() {
         feedback.addView(txt(getString(R.string.auto_reset_desc), 12f, false, muted))
         switchLine(feedback,getString(R.string.persistent_notification),
             UiPrefs.bool(this,"persistent_notification",true)) {
-            UiPrefs.setBool(this,"persistent_notification",it)
-            Feedback.refreshPersistent(applicationContext,store.activeProject().count)
-            if (it && Build.VERSION.SDK_INT >= 33 &&
-                checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
-                    PackageManager.PERMISSION_GRANTED)
-                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS),100)
+            if (!it && UiPrefs.text(this,"entry_mode","double")=="notification") {
+                toast(getString(R.string.notification_mode_requires_persistent))
+                render()
+            } else {
+                UiPrefs.setBool(this,"persistent_notification",it)
+                Feedback.refreshPersistent(applicationContext,store.activeProject().count)
+                if (it && Build.VERSION.SDK_INT >= 33 &&
+                    checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+                        PackageManager.PERMISSION_GRANTED)
+                    requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS),100)
+            }
         }
 
         val mode = card()
         mode.addView(txt(getString(R.string.entry_settings),17f,true))
         val entryMode = UiPrefs.text(this,"entry_mode","double")
-        line(mode,getString(R.string.entry_mode),
-            getString(if (entryMode=="periodic") R.string.periodic_mode else R.string.double_mode)) {
+        val entryLabel = when (entryMode) {
+            "periodic" -> R.string.periodic_mode
+            "notification" -> R.string.notification_mode
+            else -> R.string.double_mode
+        }
+        line(mode,getString(R.string.entry_mode), getString(entryLabel)) {
             choose(getString(R.string.entry_mode),
-                arrayOf(getString(R.string.double_mode),getString(R.string.periodic_mode)),
-                arrayOf("double","periodic"),"entry_mode")
+                arrayOf(getString(R.string.double_mode),
+                    getString(R.string.periodic_mode),
+                    getString(R.string.notification_mode)),
+                arrayOf("double","periodic","notification"),"entry_mode")
         }
         if (entryMode=="double") {
             line(mode,getString(R.string.entry_interval),
                 getString(R.string.seconds_unit,UiPrefs.int(this,"entry_interval_seconds",5))) {
                 askSettingNumber(R.string.entry_interval,"entry_interval_seconds",1,60,5)
             }
-        } else {
+        } else if (entryMode=="periodic") {
             line(mode,getString(R.string.periodic_interval),
                 getString(R.string.taps_unit,UiPrefs.int(this,"periodic_interval",10))) {
                 askSettingNumber(R.string.periodic_interval,"periodic_interval",2,1000,10)

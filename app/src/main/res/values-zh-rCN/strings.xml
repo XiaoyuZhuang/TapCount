@@ -91,7 +91,7 @@
     <string name="periodic_interval">每多少次进入界面</string>
     <string name="seconds_unit">%1$d 秒</string>
     <string name="taps_unit">%1$d 次</string>
-    <string name="periodic_explainer">双击模式：规定时间内第二次点击仅打开界面，不再加分。连续模式：每次都计数，第 N 次计数后自动打开界面。</string>
+    <string name="periodic_explainer">间隔双击：在设定时间内第二次点击进入界面，不重复计分。每 N 次：第 N 次计数后自动打开界面。通过通知进入：每次点击都只计数，点击常驻通知进入设置。</string>
     <string name="bonus_settings">随机奖励</string>
     <string name="bonus_enabled">开启随机奖励</string>
     <string name="bonus_pity">保底次数</string>
@@ -124,4 +124,8 @@
     <string name="history_date_range">%1$s ～ %2$s</string>
     <string name="history_to_today">返回今天</string>
     <string name="today_no_events">今天还没有操作记录</string>
+    <string name="notification_mode">通过通知进入</string>
+    <string name="notification_mode_disabled">轻计的通知已在系统中关闭。请先到安卓系统设置中允许轻计发送通知，再选择该模式；目前仍保留原来的进入方式。</string>
+    <string name="notification_mode_permission_required">需要允许通知才能使用“通过通知进入”。已保留原来的启动方式。</string>
+    <string name="notification_mode_requires_persistent">使用“通过通知进入”时必须保留常驻通知。</string>
 </resources>

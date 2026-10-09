@@ -27,14 +27,14 @@ class LaunchActivity : Activity() {
         val now = SystemClock.elapsedRealtime()
         val previous = prefs.getLong("last_launch_elapsed", 0L)
         val interval = prefs.getInt("entry_interval_seconds", 5).coerceIn(1, 60) * 1_000L
-        if (mode != "periodic" && previous > 0L && now >= previous && now - previous < interval) {
+        if (mode == "double" && previous > 0L && now >= previous && now - previous < interval) {
             prefs.edit().putLong("last_launch_elapsed", 0L).commit()
             openDashboard()
             return
         }
         try {
             val outcome = CounterStore(applicationContext).tapActive()
-            prefs.edit().putLong("last_launch_elapsed", if (mode == "periodic") 0L else now).commit()
+            prefs.edit().putLong("last_launch_elapsed", if (mode == "double") now else 0L).commit()
             Feedback.counted(applicationContext, outcome)
             Shortcuts.refresh(applicationContext, outcome.project.count)
             if (outcome.openDashboard) { openDashboard(); return }

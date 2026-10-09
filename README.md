@@ -71,3 +71,9 @@ Keep the private TXT and its contents out of issues, Git commits, logs, chat scr
 - History supports switching 7- or 30-day windows backward or forward and jumping directly to any past end date. All older day records remain in the local database.
 - Both the persistent notification and short success / reward notifications have an actionable tap target: open the management app directly on **Settings**, without incrementing the counter.
 - The default double-launch interval is again **5 seconds**, configurable in settings. Previously saved custom intervals are preserved.
+
+## v0.3.2
+- Added third launch entry mode, **Via notification**: app and numeric shortcut taps always count, including rapid successive taps. Only tapping a notification opens the management Settings screen. Double-tap and every-N shortcuts are disabled in this mode.
+- Notification permission/availability checked before entering notification-only mode. Persistent notification is automatically enabled and cannot be disabled while notification-only mode is selected. OS-level notification blocking may still prevent access until notification permission is restored.
+- Restored compact home feedback: today, yesterday, and signed today-minus-yesterday points.
+- Display per-hour numeric points directly above each bar on the home chart, including zero-value hours. Long hourly ranges scroll horizontally to keep numbers readable.
