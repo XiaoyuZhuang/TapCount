@@ -254,12 +254,13 @@ class MainActivity : Activity() {
 
     private fun showDayDetails(projectId: Long, date: String) {
         val events = store.events(projectId, date)
-        val content = if (events.isEmpty()) getString(R.string.no_records)
-        else events.joinToString("\n") { event ->
+        val activity = if (events.isEmpty()) getString(R.string.no_records)
+        else events.joinToString("\\n") { event ->
             val time = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
                 .format(java.util.Date(event.at))
             val kind = when (event.kind) {
                 "tap" -> getString(R.string.log_tap)
+                "bonus" -> getString(R.string.bonus_title)
                 "add" -> getString(R.string.log_add)
                 "set" -> getString(R.string.log_set)
                 else -> getString(R.string.log_reset)
@@ -267,32 +268,15 @@ class MainActivity : Activity() {
             time + "  " + kind + "  " +
                 (if (event.delta >= 0) "+" else "") + event.delta + "  → " + event.after
         }
-        AlertDialog.Builder(this)
-            .setTitle(getString(R.string.activity_history, date))
-            .setMessage(content)
-            .setPositiveButton(R.string.confirm, null)
-            .show()
+        StyledDialogs.dayDetails(this, getString(R.string.activity_history, date),
+            store.hourly(projectId, date), activity)
     }
 
     private fun askName(title: String, initial: String = "", onAccept: (String) -> Unit) {
-        val input = EditText(this).apply {
-            setSingleLine(true)
-            setText(initial)
-            setSelection(text.length)
-            setPadding(dp(20), dp(12), dp(20), dp(12))
+        StyledDialogs.input(this,title,initial) { name ->
+            if (name.isEmpty()) { toast(getString(R.string.empty_name)); false }
+            else { onAccept(name); true }
         }
-        val dialog = AlertDialog.Builder(this)
-            .setTitle(title).setView(input)
-            .setNegativeButton(R.string.cancel, null)
-            .setPositiveButton(R.string.save, null).create()
-        dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                val name = input.text.toString().trim()
-                if (name.isEmpty()) toast(getString(R.string.empty_name))
-                else { onAccept(name); dialog.dismiss() }
-            }
-        }
-        dialog.show()
     }
 
     private fun showProjects() {
@@ -317,6 +301,7 @@ class MainActivity : Activity() {
                 item.setOnClickListener {
                     store.setActive(project.id)
                     Shortcuts.refresh(applicationContext, store.activeProject().count)
+                    Feedback.refreshPersistent(applicationContext, store.activeProject().count)
                     page = 0; render()
                 }
                 item.setOnLongClickListener {
@@ -332,6 +317,7 @@ class MainActivity : Activity() {
                     val id = store.addProject(name, folder.id)
                     store.setActive(id)
                     Shortcuts.refresh(applicationContext, 0)
+                    Feedback.refreshPersistent(applicationContext, 0)
                     page = 0; render()
                 }
             }
@@ -339,53 +325,55 @@ class MainActivity : Activity() {
     }
 
     private fun editMenu() {
-        val labels = arrayOf(
-            getString(R.string.add_amount), getString(R.string.subtract_amount),
-            getString(R.string.set_count), getString(R.string.reset_count)
-        )
-        AlertDialog.Builder(this).setTitle(R.string.edit_count).setItems(labels) { _, option ->
+        val labels = arrayOf(getString(R.string.add_amount),
+            getString(R.string.subtract_amount),getString(R.string.set_count),
+            getString(R.string.reset_count))
+        StyledDialogs.options(this,getString(R.string.edit_count),labels) { option ->
             when (option) {
                 0 -> askNumber(labels[0], "add")
                 1 -> askNumber(labels[1], "subtract")
                 2 -> askNumber(labels[2], "set")
-                3 -> AlertDialog.Builder(this)
-                    .setTitle(R.string.reset_count).setMessage(R.string.confirm_reset)
-                    .setNegativeButton(R.string.cancel, null)
-                    .setPositiveButton(R.string.confirm) { _, _ ->
-                        commitCount("reset", 0)
-                    }.show()
+                3 -> StyledDialogs.confirm(this,getString(R.string.reset_count),
+                    getString(R.string.confirm_reset)) { commitCount("reset",0) }
             }
-        }.show()
+        }
     }
 
     private fun askNumber(title: String, kind: String) {
-        val input = EditText(this).apply {
-            inputType = InputType.TYPE_CLASS_NUMBER
-            hint = "0"
-            setPadding(dp(20), dp(12), dp(20), dp(12))
-        }
-        val dialog = AlertDialog.Builder(this).setTitle(title).setView(input)
-            .setNegativeButton(R.string.cancel, null)
-            .setPositiveButton(R.string.confirm, null).create()
-        dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
-                val value = input.text.toString().toLongOrNull()
-                if (value == null || value < 0L || value > 1_000_000_000L) {
-                    toast(getString(R.string.invalid_number))
-                } else {
-                    commitCount(if (kind == "subtract") "add" else kind,
-                        if (kind == "subtract") -value.toInt() else value.toInt())
-                    dialog.dismiss()
-                }
+        StyledDialogs.input(this,title,numeric=true) { typed ->
+            val value = typed.toLongOrNull()
+            if (value == null || value < 0L || value > 1_000_000_000L) {
+                toast(getString(R.string.invalid_number)); false
+            } else {
+                commitCount(if (kind=="subtract") "add" else kind,
+                    if (kind=="subtract") -value.toInt() else value.toInt())
+                true
             }
         }
-        dialog.show()
+    }
+
+    private fun askSettingNumber(titleId: Int, key: String,
+                                 min: Int, max: Int, fallback: Int) {
+        val current = getSharedPreferences("tapcount", Context.MODE_PRIVATE)
+            .getInt(key,fallback)
+        StyledDialogs.input(this,getString(titleId),current.toString(),numeric=true) { typed ->
+            val value = typed.toIntOrNull()
+            if (value == null || value !in min..max) {
+                toast(getString(R.string.range_error,min,max))
+                false
+            } else {
+                UiPrefs.setInt(this,key,value)
+                render()
+                true
+            }
+        }
     }
 
     private fun commitCount(kind: String, value: Int) {
         try {
             val p = store.adjustActive(kind, value)
             Shortcuts.refresh(applicationContext, p.count)
+            Feedback.refreshPersistent(applicationContext, p.count)
             render()
         } catch (e: Exception) { toast(e.message ?: getString(R.string.invalid_number)) }
     }
@@ -402,15 +390,16 @@ class MainActivity : Activity() {
         parent.addView(r)
     }
 
-    private fun choose(title: String, labels: Array<String>, values: Array<String>,
-                       key: String) {
-        val selected = values.indexOf(UiPrefs.text(this, key)).coerceAtLeast(0)
-        AlertDialog.Builder(this).setTitle(title)
-            .setSingleChoiceItems(labels, selected) { dialog, index ->
-                UiPrefs.setText(this, key, values[index])
-                dialog.dismiss()
-                recreate()
-            }.setNegativeButton(R.string.cancel, null).show()
+    private fun choose(title: String, labels: Array<String>,
+                       values: Array<String>, key: String) {
+        StyledDialogs.options(this,title,labels) { index ->
+            UiPrefs.setText(this,key,values[index])
+            if (key=="entry_mode") {
+                getSharedPreferences("tapcount", Context.MODE_PRIVATE).edit()
+                    .putLong("last_launch_elapsed",0L).apply()
+            }
+            if (key=="theme" || key=="language") recreate() else render()
+        }
     }
 
     private fun showSettings() {
@@ -434,6 +423,56 @@ class MainActivity : Activity() {
             store.setDailyReset(p.id, it)
         }
         feedback.addView(txt(getString(R.string.auto_reset_desc), 12f, false, muted))
+        switchLine(feedback,getString(R.string.persistent_notification),
+            UiPrefs.bool(this,"persistent_notification",false)) {
+            UiPrefs.setBool(this,"persistent_notification",it)
+            Feedback.refreshPersistent(applicationContext,store.activeProject().count)
+            if (it && Build.VERSION.SDK_INT >= 33 &&
+                checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+                    PackageManager.PERMISSION_GRANTED)
+                requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS),100)
+        }
+
+        val mode = card()
+        mode.addView(txt(getString(R.string.entry_settings),17f,true))
+        val entryMode = UiPrefs.text(this,"entry_mode","double")
+        line(mode,getString(R.string.entry_mode),
+            getString(if (entryMode=="periodic") R.string.periodic_mode else R.string.double_mode)) {
+            choose(getString(R.string.entry_mode),
+                arrayOf(getString(R.string.double_mode),getString(R.string.periodic_mode)),
+                arrayOf("double","periodic"),"entry_mode")
+        }
+        if (entryMode=="double") {
+            line(mode,getString(R.string.entry_interval),
+                getString(R.string.seconds_unit,UiPrefs.int(this,"entry_interval_seconds",1))) {
+                askSettingNumber(R.string.entry_interval,"entry_interval_seconds",1,60,1)
+            }
+        } else {
+            line(mode,getString(R.string.periodic_interval),
+                getString(R.string.taps_unit,UiPrefs.int(this,"periodic_interval",10))) {
+                askSettingNumber(R.string.periodic_interval,"periodic_interval",2,1000,10)
+            }
+        }
+        mode.addView(txt(getString(R.string.periodic_explainer),12f,false,muted))
+
+        val bonus = card()
+        bonus.addView(txt(getString(R.string.bonus_settings),17f,true))
+        switchLine(bonus,getString(R.string.bonus_enabled),
+            UiPrefs.bool(this,"bonus_enabled",false)) {
+            UiPrefs.setBool(this,"bonus_enabled",it)
+            render()
+        }
+        if (UiPrefs.bool(this,"bonus_enabled",false)) {
+            line(bonus,getString(R.string.bonus_pity),
+                getString(R.string.taps_unit,UiPrefs.int(this,"bonus_pity",10))) {
+                askSettingNumber(R.string.bonus_pity,"bonus_pity",1,1000,10)
+            }
+            line(bonus,getString(R.string.bonus_amount),
+                "+"+UiPrefs.int(this,"bonus_amount",10)) {
+                askSettingNumber(R.string.bonus_amount,"bonus_amount",2,100000,10)
+            }
+            bonus.addView(txt(getString(R.string.bonus_description),12f,false,muted))
+        }
 
         val appearance = card()
         appearance.addView(txt(getString(R.string.appearance), 17f, true))
@@ -471,17 +510,15 @@ class MainActivity : Activity() {
             }
             startActivityForResult(i, 201)
         }
-        addAction(data, getString(R.string.import_backup)) {
-            AlertDialog.Builder(this)
-                .setTitle(R.string.import_backup).setMessage(R.string.import_warning)
-                .setNegativeButton(R.string.cancel, null)
-                .setPositiveButton(R.string.confirm) { _, _ ->
-                    val i = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "application/json"
-                    }
-                    startActivityForResult(i, 202)
-                }.show()
+        addAction(data,getString(R.string.import_backup)) {
+            StyledDialogs.confirm(this,getString(R.string.import_backup),
+                getString(R.string.import_warning)) {
+                val i = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "application/json"
+                }
+                startActivityForResult(i,202)
+            }
         }
 
         val update = card()
@@ -508,6 +545,7 @@ class MainActivity : Activity() {
                     val json = stream.bufferedReader(Charsets.UTF_8).use { it.readText() }
                     store.importJson(json)
                     Shortcuts.refresh(applicationContext, store.activeProject().count)
+                    Feedback.refreshPersistent(applicationContext, store.activeProject().count)
                     page = 0
                     render()
                     toast(getString(R.string.import_success))
@@ -557,11 +595,8 @@ class MainActivity : Activity() {
                 } finally { conn.disconnect() }
             } catch (_: Exception) {
                 runOnUiThread {
-                    AlertDialog.Builder(this)
-                        .setMessage(R.string.update_failed)
-                        .setNegativeButton(R.string.cancel, null)
-                        .setPositiveButton(R.string.open_releases) { _, _ -> openReleases() }
-                        .show()
+                    StyledDialogs.confirm(this,getString(R.string.check_update),
+                        getString(R.string.update_failed)) { openReleases() }
                 }
             }
         }.start()

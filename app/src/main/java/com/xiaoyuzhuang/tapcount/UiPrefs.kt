@@ -10,6 +10,10 @@ object UiPrefs {
         prefs(ctx).getBoolean(key, default)
     fun setBool(ctx: Context, key: String, value: Boolean) =
         prefs(ctx).edit().putBoolean(key, value).apply()
+    fun int(ctx: Context, key: String, default: Int): Int =
+        prefs(ctx).getInt(key, default)
+    fun setInt(ctx: Context, key: String, value: Int) =
+        prefs(ctx).edit().putInt(key, value).apply()
     fun text(ctx: Context, key: String, default: String = "system") =
         prefs(ctx).getString(key, default) ?: default
     fun setText(ctx: Context, key: String, value: String) =

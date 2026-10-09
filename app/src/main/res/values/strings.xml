@@ -74,7 +74,7 @@
     <string name="backup_success">Backup complete.</string>
     <string name="import_success">Data restored.</string>
     <string name="backup_failed">Backup operation failed.</string>
-    <string name="quick_guide">Tap once to count. Tap again within 5 seconds to open this dashboard.</string>
+    <string name="quick_guide">Tap once to count; configure dashboard access in Settings.</string>
     <string name="log_tap">Tap</string>
     <string name="log_add">Adjustment</string>
     <string name="log_set">Set value</string>
@@ -83,4 +83,28 @@
     <string name="about">About</string>
     <string name="refresh_shortcut">Refresh shortcut number</string>
     <string name="shortcut_refreshing">Shortcut refresh requested (launcher updates may be delayed).</string>
+    <string name="entry_settings">Launch behavior</string>
+    <string name="entry_mode">Entry mode</string>
+    <string name="double_mode">Double tap</string>
+    <string name="periodic_mode">Open on Nth tap</string>
+    <string name="entry_interval">Second tap interval</string>
+    <string name="periodic_interval">Open dashboard every</string>
+    <string name="seconds_unit">%1$d s</string>
+    <string name="taps_unit">%1$d taps</string>
+    <string name="periodic_explainer">Double-tap mode opens the dashboard on the second tap (no extra point). In periodic mode every tap counts; the Nth tap also opens the dashboard.</string>
+    <string name="bonus_settings">Random rewards</string>
+    <string name="bonus_enabled">Enable random rewards</string>
+    <string name="bonus_pity">Guaranteed reward after</string>
+    <string name="bonus_amount">Bonus points</string>
+    <string name="bonus_description">Every tap has a 1/N chance to win. The Nth unsuccessful tap is guaranteed to win. After a win, only the draw progress resets; earned points are never cleared.</string>
+    <string name="bonus_channel">Random reward</string>
+    <string name="bonus_title">Lucky reward!</string>
+    <string name="bonus_notification">Bonus +%1$d! Total: %2$d</string>
+    <string name="total_channel">Current points</string>
+    <string name="persistent_notification">Keep current total in notification shade</string>
+    <string name="persistent_count">Current points: %1$d</string>
+    <string name="hourly_breakdown">Hourly tap activity</string>
+    <string name="hourly_values">%1$d taps · +%2$d points</string>
+    <string name="activity_details">Event details</string>
+    <string name="range_error">Enter an integer from %1$d to %2$d</string>
 </resources>

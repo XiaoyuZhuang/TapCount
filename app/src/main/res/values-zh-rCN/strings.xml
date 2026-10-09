@@ -74,7 +74,7 @@
     <string name="backup_success">备份完成。</string>
     <string name="import_success">恢复成功。</string>
     <string name="backup_failed">备份操作失败。</string>
-    <string name="quick_guide">启动一次自动+1，5秒内第二次启动进入管理界面。</string>
+    <string name="quick_guide">启动一次自动计数；可在设置中自定义进入界面方式。</string>
     <string name="log_tap">点击计数</string>
     <string name="log_add">手动调整</string>
     <string name="log_set">设定数值</string>
@@ -83,4 +83,28 @@
     <string name="about">关于</string>
     <string name="refresh_shortcut">刷新桌面数字</string>
     <string name="shortcut_refreshing">已请求刷新（部分桌面可能延迟显示）。</string>
+    <string name="entry_settings">启动方式</string>
+    <string name="entry_mode">进入界面方式</string>
+    <string name="double_mode">间隔双击</string>
+    <string name="periodic_mode">每 N 次点击进入</string>
+    <string name="entry_interval">双击有效间隔</string>
+    <string name="periodic_interval">每多少次进入界面</string>
+    <string name="seconds_unit">%1$d 秒</string>
+    <string name="taps_unit">%1$d 次</string>
+    <string name="periodic_explainer">双击模式：规定时间内第二次点击仅打开界面，不再加分。连续模式：每次都计数，第 N 次计数后自动打开界面。</string>
+    <string name="bonus_settings">随机奖励</string>
+    <string name="bonus_enabled">开启随机奖励</string>
+    <string name="bonus_pity">保底次数</string>
+    <string name="bonus_amount">中奖一次增加</string>
+    <string name="bonus_description">每次点击有 1/N 概率中奖；连续 N 次未中奖则第 N 次必得。中奖后只重置抽奖进度，已获得的积分不清零。</string>
+    <string name="bonus_channel">随机奖励通知</string>
+    <string name="bonus_title">恭喜触发随机奖励！</string>
+    <string name="bonus_notification">幸运奖励 +%1$d！当前积分：%2$d</string>
+    <string name="total_channel">累计计数通知</string>
+    <string name="persistent_notification">常驻通知显示当前计数</string>
+    <string name="persistent_count">当前计数：%1$d</string>
+    <string name="hourly_breakdown">分时段计数</string>
+    <string name="hourly_values">%1$d 次 · +%2$d 分</string>
+    <string name="activity_details">操作记录</string>
+    <string name="range_error">请输入 %1$d～%2$d 之间的整数</string>
 </resources>
