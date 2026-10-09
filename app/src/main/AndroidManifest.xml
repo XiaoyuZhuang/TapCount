@@ -7,12 +7,18 @@
         android:allowBackup="true"
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
-        android:icon="@drawable/ic_launcher"
-        android:roundIcon="@drawable/ic_launcher"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true">
-        <activity android:name=".MainActivity" android:exported="false" />
+        <activity android:name=".MainActivity" android:exported="false"
+            android:taskAffinity="com.xiaoyuzhuang.tapcount.dashboard" />
         <activity android:name=".LaunchActivity" android:exported="true"
-            android:theme="@style/LaunchTheme" android:excludeFromRecents="true">
+            android:theme="@style/LaunchTheme"
+            android:taskAffinity="com.xiaoyuzhuang.tapcount.counter"
+            android:launchMode="singleInstance"
+            android:noHistory="true"
+            android:excludeFromRecents="true"
+            android:finishOnTaskLaunch="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

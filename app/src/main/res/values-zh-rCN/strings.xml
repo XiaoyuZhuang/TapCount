@@ -2,6 +2,10 @@
 <resources>
     <string name="app_name">轻计</string>
     <string name="slogan">轻轻一点，积少成多。</string>
+    <string name="day_difference">比昨天</string>
+    <string name="count_success">成功 +1</string>
+    <string name="count_notification_channel">计数成功提示</string>
+    <string name="count_notification_channel_desc">每次计数成功后的短暂通知</string>
     <string name="home">首页</string>
     <string name="history">历史</string>
     <string name="projects">项目</string>
@@ -33,7 +37,7 @@
     <string name="feedback">计数反馈</string>
     <string name="vibration">震动反馈</string>
     <string name="sound">声音反馈</string>
-    <string name="notification">通知反馈</string>
+    <string name="notification">弹窗通知反馈</string>
     <string name="auto_reset">每天自动从零开始</string>
     <string name="auto_reset_desc">昨天的计数会完整保留。</string>
     <string name="appearance">外观与语言</string>

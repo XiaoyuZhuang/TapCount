@@ -2,6 +2,10 @@
 <resources>
     <string name="app_name">TapCount</string>
     <string name="slogan">One tap. One small win.</string>
+    <string name="day_difference">vs. yesterday</string>
+    <string name="count_success">Successfully +1</string>
+    <string name="count_notification_channel">Count confirmations</string>
+    <string name="count_notification_channel_desc">Short confirmations after a successful count</string>
     <string name="home">Home</string>
     <string name="history">History</string>
     <string name="projects">Projects</string>
@@ -33,7 +37,7 @@
     <string name="feedback">Count feedback</string>
     <string name="vibration">Vibration</string>
     <string name="sound">Sound</string>
-    <string name="notification">Notification</string>
+    <string name="notification">Heads-up notification</string>
     <string name="auto_reset">Start each day at zero</string>
     <string name="auto_reset_desc">Previous-day records are retained.</string>
     <string name="appearance">Appearance and language</string>
