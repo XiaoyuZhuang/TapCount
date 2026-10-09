@@ -129,7 +129,7 @@
     <string name="notification_mode_permission_required">Allow notifications to activate notification-only entry. Your previous entry mode has been kept.</string>
     <string name="notification_mode_requires_persistent">Keep the ongoing notification enabled when using notification-only entry.</string>
     <string name="widget_title">TapCount one-tap button</string>
-    <string name="widget_explainer">For a truly silent tap without Android's splash screen, add this 1×1 home widget. It counts instantly, vibrates or notifies as configured, and shows the current number. It does not open the dashboard.</string>
+    <string name="widget_explainer">For a truly silent tap without the Android splash screen, add this 1×1 home widget. It counts instantly, vibrates or notifies as configured, and shows the current number. It does not open the dashboard.</string>
     <string name="pin_widget">Add one-tap widget to home screen</string>
     <string name="widget_requested">Confirm the add-widget prompt on your home screen.</string>
     <string name="widget_manual">Long-press an empty home-screen area → Widgets → TapCount → drag the one-tap widget onto your desktop.</string>
