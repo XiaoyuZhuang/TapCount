@@ -34,3 +34,10 @@ Android 8.0+ (API 26). Kotlin and Android Gradle Plugin, built with JDK 17.
 
 ## Notes
 Android 12+ can show a short system splash when launching the app even though the app itself doesn't present a counting screen. Different launchers may also update numeric shortcut icons at different rates.
+
+## v0.2.0 fix release
+- Separate no-UI counter task: standard launcher icon and number shortcut both increment and finish immediately, except second tap in five seconds to open management.
+- Static +1 launcher icon; live numeric count is available via pinned shortcut only. Android does not allow the normal installed launcher icon to change arbitrarily.
+- Configurable 65ms vibration, tone and high-importance short-lived notifications. System permission and phone notification channel settings determine whether a heads-up banner appears.
+- Two-column statistics and compact daily history.
+- Before updating a v0.1.0 debug APK, export a JSON backup from Settings. Runner-generated debug signing certificates may vary; uninstalling the old build deletes its local data.

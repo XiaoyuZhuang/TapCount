@@ -12,7 +12,7 @@ class BarChart(ctx: Context, private val scores: List<DayScore>, private val dar
     private fun dp(v: Float): Float = v * resources.displayMetrics.density
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), dp(200f).toInt())
+        setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), dp(158f).toInt())
     }
 
     override fun onDraw(canvas: Canvas) {

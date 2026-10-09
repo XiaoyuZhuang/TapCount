@@ -55,6 +55,15 @@ class MainActivity : Activity() {
         @Suppress("DEPRECATION")
         window.navigationBarColor = bg
         render()
+        // Android 13+ permission can only be requested in visible management UI,
+        // never from the invisible one-tap launcher activity.
+        if (Build.VERSION.SDK_INT >= 33 && UiPrefs.bool(this, "notification", true) &&
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED &&
+            !UiPrefs.bool(this, "notification_permission_asked")) {
+            UiPrefs.setBool(this, "notification_permission_asked", true)
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 100)
+        }
     }
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
@@ -80,18 +89,18 @@ class MainActivity : Activity() {
         layoutParams = LinearLayout.LayoutParams(1, dp(height))
     }
     private fun card(): LinearLayout = column().apply {
-        setPadding(dp(18), dp(16), dp(18), dp(16))
-        background = round(surface, 17)
+        setPadding(dp(13), dp(11), dp(13), dp(11))
+        background = round(surface, 13)
         layoutParams = LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-        ).apply { bottomMargin = dp(13) }
+        ).apply { bottomMargin = dp(8) }
         body.addView(this)
     }
 
     private fun action(label: String, onClick: () -> Unit, emphasized: Boolean = false): TextView =
         txt(label, 14f, true, if (emphasized) Color.WHITE else primary).apply {
             gravity = Gravity.CENTER
-            setPadding(dp(13), dp(13), dp(13), dp(13))
+            setPadding(dp(11), dp(9), dp(11), dp(9))
             background = round(if (emphasized) primary else
                 if (isDark) Color.rgb(48, 61, 83) else Color.rgb(231, 238, 255), 12)
             setOnClickListener { onClick() }
@@ -100,12 +109,12 @@ class MainActivity : Activity() {
     private fun addAction(holder: LinearLayout, label: String, emphasized: Boolean = false, onClick: () -> Unit) {
         holder.addView(action(label, onClick, emphasized),
             LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT).apply { topMargin = dp(10) })
+                ViewGroup.LayoutParams.WRAP_CONTENT).apply { topMargin = dp(7) })
     }
 
     private fun line(holder: LinearLayout, title: String, value: String, clickable: (() -> Unit)? = null) {
         val r = row()
-        r.setPadding(0, dp(11), 0, dp(11))
+        r.setPadding(0, dp(6), 0, dp(6))
         val label = txt(title, 14f, false, fg)
         r.addView(label, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
         r.addView(txt(value, 14f, true, muted))
@@ -118,22 +127,21 @@ class MainActivity : Activity() {
     private fun render() {
         isDark = UiPrefs.dark(this)
         val outer = column().apply { setBackgroundColor(bg) }
-        val header = column().apply { setPadding(dp(22), dp(20), dp(22), dp(12)) }
-        header.addView(txt(getString(R.string.app_name), 25f, true))
-        header.addView(txt(getString(R.string.slogan), 12f, false, muted))
+        val header = column().apply { setPadding(dp(16), dp(11), dp(16), dp(6)) }
+        header.addView(txt(getString(R.string.app_name), 22f, true))
         outer.addView(header)
         val scroll = ScrollView(this).apply {
             isFillViewport = true
             clipToPadding = false
         }
         body = column().apply {
-            setPadding(dp(18), dp(5), dp(18), dp(24))
+            setPadding(dp(12), dp(2), dp(12), dp(10))
         }
         scroll.addView(body)
         outer.addView(scroll, LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
         val nav = row().apply {
-            setPadding(dp(8), dp(7), dp(8), dp(11))
+            setPadding(dp(8), dp(4), dp(8), dp(5))
             setBackgroundColor(surface)
         }
         val tabs = intArrayOf(R.string.home, R.string.history, R.string.projects, R.string.settings)
@@ -141,7 +149,7 @@ class MainActivity : Activity() {
             val tab = txt(getString(stringId), 13f, index == page,
                 if (index == page) primary else muted)
             tab.gravity = Gravity.CENTER
-            tab.setPadding(0, dp(9), 0, dp(9))
+            tab.setPadding(0, dp(7), 0, dp(7))
             tab.setOnClickListener { page = index; render() }
             nav.addView(tab, LinearLayout.LayoutParams(0,
                 ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
@@ -156,41 +164,59 @@ class MainActivity : Activity() {
         }
     }
 
+    private fun statCell(label: String, value: String): LinearLayout = column().apply {
+        setPadding(dp(10), dp(8), dp(10), dp(8))
+        background = round(if (isDark) Color.rgb(42, 50, 67) else Color.rgb(241, 245, 251), 10)
+        addView(txt(label, 11f, false, muted))
+        addView(txt(value, 19f, true, fg))
+    }
+
+    private fun statPair(holder: LinearLayout,
+                         label1: String, value1: String,
+                         label2: String, value2: String) {
+        val r = row().apply { setPadding(0, dp(3), 0, dp(3)) }
+        r.addView(statCell(label1, value1),
+            LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+                .apply { rightMargin = dp(8) })
+        r.addView(statCell(label2, value2),
+            LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        holder.addView(r)
+    }
+
     private fun showHome() {
         val p = store.activeProject()
-        val today = store.recent(p.id, 2)
-        val yesterday = today.first().count
-        val daily = today.last().count
+        val recent = store.recent(p.id, 2)
+        val yesterday = recent.first().count
+        val daily = recent.last().count
+
         val top = card()
-        top.addView(txt(p.name, 15f, true, muted))
-        top.addView(space(10))
-        val big = txt(p.count.toString(), 58f, true)
-        big.gravity = Gravity.CENTER_HORIZONTAL
-        top.addView(big)
-        val caption = txt(getString(R.string.current_count), 12f, false, muted)
-        caption.gravity = Gravity.CENTER_HORIZONTAL
-        top.addView(caption)
-        top.addView(space(17))
-        line(top, getString(R.string.today), daily.toString())
-        line(top, getString(R.string.yesterday), yesterday.toString())
-        line(top, getString(R.string.all_time), store.total(p.id).toString())
-        line(top, getString(R.string.compared_yesterday, daily - yesterday), "")
+        val headline = row()
+        val labelBlock = column()
+        labelBlock.addView(txt(p.name, 16f, true))
+        labelBlock.addView(txt(getString(R.string.current_count), 11f, false, muted))
+        headline.addView(labelBlock,
+            LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        headline.addView(txt(p.count.toString(), 42f, true, primary))
+        top.addView(headline)
+        top.addView(space(6))
+        statPair(top, getString(R.string.today), daily.toString(),
+            getString(R.string.yesterday), yesterday.toString())
+        statPair(top, getString(R.string.all_time), store.total(p.id).toString(),
+            getString(R.string.day_difference),
+            (if (daily - yesterday >= 0) "+" else "") + (daily - yesterday))
         addAction(top, getString(R.string.edit_count), true) { editMenu() }
 
         val c = card()
-        c.addView(txt(getString(R.string.day_chart), 17f, true))
-        c.addView(space(12))
+        c.addView(txt(getString(R.string.day_chart), 15f, true))
         c.addView(BarChart(this, store.recent(p.id, 7), isDark))
         addAction(c, getString(R.string.daily_history)) { page = 1; render() }
-        val intro = card()
-        intro.addView(txt(getString(R.string.quick_guide), 13f, false, muted))
     }
 
     private fun showHistory() {
         val p = store.activeProject()
         val c = card()
-        c.addView(txt(p.name + " · " + getString(R.string.day_chart), 17f, true))
-        val selector = row().apply { setPadding(0, dp(14), 0, dp(10)) }
+        c.addView(txt(p.name + " · " + getString(R.string.day_chart), 15f, true))
+        val selector = row().apply { setPadding(0, dp(6), 0, dp(5)) }
         val seven = action(getString(R.string.recent_7), { days = 7; render() }, days == 7)
         val thirty = action(getString(R.string.recent_30), { days = 30; render() }, days == 30)
         selector.addView(seven, LinearLayout.LayoutParams(0,
@@ -203,10 +229,26 @@ class MainActivity : Activity() {
         val listCard = card()
         listCard.addView(txt(getString(R.string.daily_history), 17f, true))
         val records = store.recent(p.id, days).reversed()
-        for (record in records) {
-            line(listCard, record.day, record.count.toString()) {
-                showDayDetails(p.id, record.day)
+        for (pair in records.chunked(2)) {
+            val r = row().apply { setPadding(0, dp(2), 0, dp(2)) }
+            for ((index, record) in pair.withIndex()) {
+                val item = row().apply {
+                    setPadding(dp(8), dp(7), dp(8), dp(7))
+                    background = round(if (isDark) Color.rgb(42, 50, 67) else
+                        Color.rgb(241, 245, 251), 9)
+                }
+                val compactDate = record.day.substring(5)
+                item.addView(txt(compactDate, 12f, false, muted),
+                    LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+                item.addView(txt(record.count.toString(), 14f, true))
+                item.setOnClickListener { showDayDetails(p.id, record.day) }
+                r.addView(item, LinearLayout.LayoutParams(0,
+                    ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+                    .apply { if (index == 0) rightMargin = dp(8) })
             }
+            if (pair.size == 1) r.addView(View(this),
+                LinearLayout.LayoutParams(0, dp(1), 1f))
+            listCard.addView(r)
         }
     }
 
@@ -350,7 +392,7 @@ class MainActivity : Activity() {
 
     private fun switchLine(parent: LinearLayout, title: String, checked: Boolean,
                            onToggle: (Boolean) -> Unit) {
-        val r = row().apply { setPadding(0, dp(9), 0, dp(9)) }
+        val r = row().apply { setPadding(0, dp(6), 0, dp(6)) }
         r.addView(txt(title), LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
         val sw = Switch(this).apply {
             isChecked = checked
@@ -381,7 +423,7 @@ class MainActivity : Activity() {
         switchLine(feedback, getString(R.string.sound), UiPrefs.bool(this, "sound")) {
             UiPrefs.setBool(this, "sound", it)
         }
-        switchLine(feedback, getString(R.string.notification), UiPrefs.bool(this, "notification")) {
+        switchLine(feedback, getString(R.string.notification), UiPrefs.bool(this, "notification", true)) {
             UiPrefs.setBool(this, "notification", it)
             if (it && Build.VERSION.SDK_INT >= 33 &&
                 checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
