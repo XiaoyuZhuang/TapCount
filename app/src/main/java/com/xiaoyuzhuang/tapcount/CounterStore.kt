@@ -39,6 +39,9 @@ class CounterStore(private val ctx: Context) :
         db.execSQL("CREATE TABLE daily (project_id INTEGER NOT NULL, day TEXT NOT NULL, count INTEGER NOT NULL, PRIMARY KEY(project_id, day))")
         db.execSQL("CREATE TABLE events (id INTEGER PRIMARY KEY AUTOINCREMENT, project_id INTEGER NOT NULL, day TEXT NOT NULL, at_ms INTEGER NOT NULL, kind TEXT NOT NULL, delta INTEGER NOT NULL, after_count INTEGER NOT NULL)")
         stateTable(db)
+        seedDefault(db)
+    }
+    private fun seedDefault(db: SQLiteDatabase) {
         val folderId = db.insertOrThrow("folders", null,
             ContentValues().apply { put("name", ctx.getString(R.string.default_folder)) })
         val projectId = db.insertOrThrow("projects", null, ContentValues().apply {
@@ -156,7 +159,7 @@ class CounterStore(private val ctx: Context) :
             val won = rewardOn && (nextPity >= guarantee || Random.nextInt(guarantee) == 0)
             val points = if (won) award else 1
             val next = (p.count.toLong() + points).coerceAtMost(1_000_000_000L).toInt()
-            val mode = prefs.getString("entry_mode", "double")
+            val mode = prefs.getString("entry_mode", "open")
             val every = prefs.getInt("periodic_interval", 10).coerceIn(2, 1000)
             val sequence = if (mode == "periodic" && allowAutomaticEntry) periodic + 1 else periodic
             val opens = allowAutomaticEntry && mode == "periodic" && sequence >= every
@@ -185,6 +188,52 @@ class CounterStore(private val ctx: Context) :
             return updated
         } finally { db.endTransaction() }
     }
+    /**
+     * Clear only today for the active project. Unlike a logged "reset" edit,
+     * this removes every event and the daily aggregate altogether.
+     * Older days and all other projects are left untouched.
+     */
+    fun clearTodayActive(): CounterProject {
+        val db = writableDatabase
+        db.beginTransaction()
+        try {
+            val active = readProject(db, activeId()) ?: projects().first()
+            val today = day()
+            db.delete("events", "project_id=? AND day=?",
+                arrayOf(active.id.toString(), today))
+            db.delete("daily", "project_id=? AND day=?",
+                arrayOf(active.id.toString(), today))
+            // A fresh day starts at zero, including carried count if auto-reset
+            // is disabled. Rewards and periodic-open progress also restart.
+            db.execSQL("UPDATE projects SET current_count=0,last_day=? WHERE id=?",
+                arrayOf(today, active.id))
+            db.execSQL("INSERT OR IGNORE INTO counter_state(project_id) VALUES (?)",
+                arrayOf(active.id))
+            db.execSQL("UPDATE counter_state SET pity=0,periodic_taps=0 WHERE project_id=?",
+                arrayOf(active.id))
+            db.setTransactionSuccessful()
+            return (readProject(db, active.id) ?: error("Active project missing"))
+        } finally { db.endTransaction() }
+    }
+
+    /**
+     * Factory reset app-owned SQLite records and user settings, then recreate
+     * the default folder/project. No exported files are touched.
+     */
+    fun resetAllData(): CounterProject {
+        val db = writableDatabase
+        db.beginTransaction()
+        try {
+            for (table in listOf("counter_state","events","daily","projects","folders"))
+                db.delete(table, null, null)
+            db.execSQL("DELETE FROM sqlite_sequence WHERE name IN ('events','projects','folders')")
+            seedDefault(db)
+            db.setTransactionSuccessful()
+        } finally { db.endTransaction() }
+        check(prefs.edit().clear().commit()) { "Failed to reset saved settings" }
+        return activeProject()
+    }
+
     fun total(id: Long): Long {
         readableDatabase.rawQuery("SELECT COALESCE(SUM(count),0) FROM daily WHERE project_id=?",
             arrayOf(id.toString())).use { c -> return if (c.moveToFirst()) c.getLong(0) else 0L }

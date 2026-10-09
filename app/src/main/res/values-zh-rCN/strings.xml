@@ -91,7 +91,7 @@
     <string name="periodic_interval">每多少次进入界面</string>
     <string name="seconds_unit">%1$d 秒</string>
     <string name="taps_unit">%1$d 次</string>
-    <string name="periodic_explainer">间隔双击：在设定时间内第二次点击进入界面，不重复计分。每 N 次：第 N 次计数后自动打开界面。通过通知进入：每次点击都只计数，点击常驻通知进入设置。</string>
+    <string name="periodic_explainer">点击图标进入（默认）：每次点击图标先计数，再直接进入管理界面；间隔双击：在设定时间内第二次点击进入，不重复计分；每 N 次：第 N 次计数后进入；通过通知进入：点击仅计数，从常驻通知进入设置。</string>
     <string name="bonus_settings">随机奖励</string>
     <string name="bonus_enabled">开启随机奖励</string>
     <string name="bonus_pity">保底次数</string>
@@ -134,4 +134,11 @@
     <string name="widget_requested">请在桌面弹窗中确认添加小组件。</string>
     <string name="widget_manual">请长按桌面空白处 → 小组件 → 轻计，将一键计数组件添加到桌面。</string>
     <string name="legacy_shortcut_label">传统快捷方式（可选）</string>
+    <string name="open_mode">点击图标进入</string>
+    <string name="delete_today">删除</string>
+    <string name="delete_today_warning">确定清空当前项目今天的所有操作记录及积分，并将当前计数归零吗？其他日期和其他项目的数据将保留，清除后无法撤销。</string>
+    <string name="today_deleted">今日记录及积分已清空。</string>
+    <string name="clear_all_data">清除所有数据</string>
+    <string name="clear_all_warning">确定将软件恢复初始化吗？全部项目、文件夹、历史记录、积分、随机奖励进度和软件设置都将永久删除。需要保留数据请先导出备份，此操作无法撤销。</string>
+    <string name="all_data_deleted">所有数据已清除，软件已恢复初始设置。</string>
 </resources>

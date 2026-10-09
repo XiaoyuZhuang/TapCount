@@ -23,7 +23,7 @@ class LaunchActivity : Activity() {
     }
     private fun processLaunch() {
         val prefs = getSharedPreferences("tapcount", Context.MODE_PRIVATE)
-        val mode = prefs.getString("entry_mode", "double")
+        val mode = prefs.getString("entry_mode", "open")
         val now = SystemClock.elapsedRealtime()
         val previous = prefs.getLong("last_launch_elapsed", 0L)
         val interval = prefs.getInt("entry_interval_seconds", 5).coerceIn(1, 60) * 1_000L
@@ -37,7 +37,7 @@ class LaunchActivity : Activity() {
             prefs.edit().putLong("last_launch_elapsed", if (mode == "double") now else 0L).commit()
             Feedback.counted(applicationContext, outcome)
             Shortcuts.refresh(applicationContext, outcome.project.count)
-            if (outcome.openDashboard) { openDashboard(); return }
+            if (mode == "open" || outcome.openDashboard) { openDashboard(); return }
         } catch (ex: Exception) {
             Log.e("TapCount", "Counter failed", ex)
         }

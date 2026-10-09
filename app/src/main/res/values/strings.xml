@@ -91,7 +91,7 @@
     <string name="periodic_interval">Open dashboard every</string>
     <string name="seconds_unit">%1$d s</string>
     <string name="taps_unit">%1$d taps</string>
-    <string name="periodic_explainer">Double-tap: second tap within the interval opens management without another point. Every N taps: the Nth tap also opens management. Via notification: every tap only counts; tap the ongoing notification to open Settings.</string>
+    <string name="periodic_explainer">Tap icon to open (default): every icon tap counts +1 and opens management. Double-tap: the second tap inside the time window opens management without another point. Every N taps: the Nth count opens management. Via notification: taps only count; open Settings from the ongoing notification.</string>
     <string name="bonus_settings">Random rewards</string>
     <string name="bonus_enabled">Enable random rewards</string>
     <string name="bonus_pity">Guaranteed reward after</string>
@@ -134,4 +134,11 @@
     <string name="widget_requested">Confirm the add-widget prompt on your home screen.</string>
     <string name="widget_manual">Long-press an empty home-screen area → Widgets → TapCount → drag the one-tap widget onto your desktop.</string>
     <string name="legacy_shortcut_label">Legacy activity shortcut (optional)</string>
+    <string name="open_mode">Tap icon to open</string>
+    <string name="delete_today">Delete</string>
+    <string name="delete_today_warning">Clear all of today activity and points for the current project? Today will restart at 0. Past dates and other projects will be preserved. This cannot be undone.</string>
+    <string name="today_deleted">Today activity and points cleared.</string>
+    <string name="clear_all_data">Clear all data</string>
+    <string name="clear_all_warning">Restore this app to factory defaults? ALL projects, folders, point totals, historical activity, random reward progress and app preferences will be permanently deleted. Please export a backup first if needed. This cannot be undone.</string>
+    <string name="all_data_deleted">All local data cleared. Defaults restored.</string>
 </resources>

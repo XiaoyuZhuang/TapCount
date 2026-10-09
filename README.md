@@ -89,3 +89,9 @@ Keep the private TXT and its contents out of issues, Git commits, logs, chat scr
 - Retains the no-splash broadcast-based widget. The widget now prioritizes the **live numeric count** with +1 below, behaving visually more like a traditional numeric desktop shortcut.
 - The **numeric no-splash widget** is now the primary/recommended choice in Settings → Numeric home button; the older Activity-based pinned numeric shortcut remains optional for compatibility.
 - Android must let users approve adding a widget to the home screen. The app cannot silently replace its own installed launcher icon or automatically install a widget without launcher approval.
+
+## v0.3.5
+- New default entry mode: **Tap icon to open** — launching the normal app icon or existing Activity shortcut counts one tap, then opens the management screen. Existing manually saved entry modes remain unchanged on upgrade.
+- Retains double-tap (5 s default), every N taps, and notification-only modes; notification and no-splash numeric widget entries remain supported. The widget always counts without displaying management.
+- Added a compact **Delete** action beside Home → Today activity. It atomically deletes all of today's events and daily total for the active project, resets its current score to zero and its reward/periodic progress; older days and other projects are preserved. This is not the existing logged Reset operation.
+- Added **Clear all data** under Settings → Data. Confirmed factory reset removes every project, folder, historical event, score, reward state, and SharedPreferences setting; recreates the default folder/project; refreshes widget, shortcut, and persistent notification. External backups remain unaffected. Export a JSON backup before using this irreversible operation.

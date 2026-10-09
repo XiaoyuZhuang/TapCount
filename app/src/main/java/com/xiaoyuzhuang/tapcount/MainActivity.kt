@@ -263,6 +263,13 @@ class MainActivity : Activity() {
             LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
         val editButton = action(getString(R.string.edit_count), { editMenu() })
         logTitle.addView(editButton)
+        val deleteButton = action(getString(R.string.delete_today), {
+            StyledDialogs.confirm(this, getString(R.string.delete_today),
+                getString(R.string.delete_today_warning)) { clearTodayData() }
+        })
+        logTitle.addView(deleteButton,
+            LinearLayout.LayoutParams(-2, ViewGroup.LayoutParams.WRAP_CONTENT)
+                .apply { marginStart = dp(7) })
         logCard.addView(logTitle)
 
         val events = store.events(project.id, date)
@@ -444,6 +451,35 @@ class MainActivity : Activity() {
         }
     }
 
+    private fun clearTodayData() {
+        try {
+            val p = store.clearTodayActive()
+            Shortcuts.refresh(applicationContext, p.count)
+            Feedback.refreshPersistent(applicationContext, p.count)
+            render()
+            toast(getString(R.string.today_deleted))
+        } catch (e: Exception) {
+            toast(e.message ?: getString(R.string.backup_failed))
+        }
+    }
+
+    private fun clearEverything() {
+        try {
+            val p = store.resetAllData()
+            getSystemService(NotificationManager::class.java).cancelAll()
+            Shortcuts.refresh(applicationContext, p.count)
+            Feedback.refreshPersistent(applicationContext, p.count)
+            days = 7
+            historyEnd = LocalDate.now()
+            page = 0
+            // Delay theme/language recreation until confirmation dialog has closed.
+            window.decorView.post { recreate() }
+            toast(getString(R.string.all_data_deleted))
+        } catch (e: Exception) {
+            toast(e.message ?: getString(R.string.backup_failed))
+        }
+    }
+
     private fun editMenu() {
         val labels = arrayOf(getString(R.string.add_amount),
             getString(R.string.subtract_amount),getString(R.string.set_count),
@@ -578,7 +614,7 @@ class MainActivity : Activity() {
         feedback.addView(txt(getString(R.string.auto_reset_desc), 12f, false, muted))
         switchLine(feedback,getString(R.string.persistent_notification),
             UiPrefs.bool(this,"persistent_notification",true)) {
-            if (!it && UiPrefs.text(this,"entry_mode","double")=="notification") {
+            if (!it && UiPrefs.text(this,"entry_mode","open")=="notification") {
                 toast(getString(R.string.notification_mode_requires_persistent))
                 render()
             } else {
@@ -593,18 +629,20 @@ class MainActivity : Activity() {
 
         val mode = card()
         mode.addView(txt(getString(R.string.entry_settings),17f,true))
-        val entryMode = UiPrefs.text(this,"entry_mode","double")
+        val entryMode = UiPrefs.text(this,"entry_mode","open")
         val entryLabel = when (entryMode) {
+            "double" -> R.string.double_mode
             "periodic" -> R.string.periodic_mode
             "notification" -> R.string.notification_mode
-            else -> R.string.double_mode
+            else -> R.string.open_mode
         }
         line(mode,getString(R.string.entry_mode), getString(entryLabel)) {
             choose(getString(R.string.entry_mode),
-                arrayOf(getString(R.string.double_mode),
+                arrayOf(getString(R.string.open_mode),
+                    getString(R.string.double_mode),
                     getString(R.string.periodic_mode),
                     getString(R.string.notification_mode)),
-                arrayOf("double","periodic","notification"),"entry_mode")
+                arrayOf("open","double","periodic","notification"),"entry_mode")
         }
         if (entryMode=="double") {
             line(mode,getString(R.string.entry_interval),
@@ -705,6 +743,10 @@ class MainActivity : Activity() {
                 }
                 startActivityForResult(i,202)
             }
+        }
+        addAction(data, getString(R.string.clear_all_data)) {
+            StyledDialogs.confirm(this, getString(R.string.clear_all_data),
+                getString(R.string.clear_all_warning)) { clearEverything() }
         }
 
         val update = card()
