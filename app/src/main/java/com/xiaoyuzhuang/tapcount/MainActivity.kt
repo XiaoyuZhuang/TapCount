@@ -33,6 +33,7 @@ class MainActivity : Activity() {
     private lateinit var body: LinearLayout
     private var page = 0
     private var days = 7
+    private var historyEnd: LocalDate = LocalDate.now()
     private var isDark = false
 
     private val bg get() = if (isDark) Color.rgb(17, 21, 30) else Color.rgb(246, 248, 252)
@@ -50,6 +51,7 @@ class MainActivity : Activity() {
         setTheme(if (isDark) R.style.AppThemeDark else R.style.AppTheme)
         super.onCreate(savedInstanceState)
         store = CounterStore(this)
+        if (intent?.getBooleanExtra("open_settings", false) == true) page = 3
         @Suppress("DEPRECATION")
         window.statusBarColor = bg
         @Suppress("DEPRECATION")
@@ -68,6 +70,15 @@ class MainActivity : Activity() {
             !UiPrefs.bool(this, "notification_permission_asked")) {
             UiPrefs.setBool(this, "notification_permission_asked", true)
             requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 100)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent?.getBooleanExtra("open_settings", false) == true) {
+            page = 3
+            render()
         }
     }
 
@@ -177,90 +188,132 @@ class MainActivity : Activity() {
         }
     }
 
-    private fun statCell(label: String, value: String): LinearLayout = column().apply {
-        setPadding(dp(10), dp(8), dp(10), dp(8))
-        background = round(if (isDark) Color.rgb(42, 50, 67) else Color.rgb(241, 245, 251), 10)
-        addView(txt(label, 11f, false, muted))
-        addView(txt(value, 19f, true, fg))
-    }
-
-    private fun statPair(holder: LinearLayout,
-                         label1: String, value1: String,
-                         label2: String, value2: String) {
-        val r = row().apply { setPadding(0, dp(3), 0, dp(3)) }
-        r.addView(statCell(label1, value1),
-            LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-                .apply { rightMargin = dp(8) })
-        r.addView(statCell(label2, value2),
-            LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-        holder.addView(r)
-    }
-
     private fun showHome() {
-        val p = store.activeProject()
-        val recent = store.recent(p.id, 2)
-        val yesterday = recent.first().count
-        val daily = recent.last().count
+        val project = store.activeProject()
+        val date = LocalDate.now().toString()
+        val hourly = store.hourly(project.id, date)
 
-        val top = card()
-        val headline = row()
-        val labelBlock = column()
-        labelBlock.addView(txt(p.name, 16f, true))
-        labelBlock.addView(txt(getString(R.string.current_count), 11f, false, muted))
-        headline.addView(labelBlock,
+        // The first content on Home is today's points earned per hour.
+        val chart = card()
+        chart.addView(txt(getString(R.string.today_hour_points), 16f, true))
+        if (hourly.isEmpty()) {
+            chart.addView(txt(getString(R.string.today_no_events), 13f, false, muted),
+                LinearLayout.LayoutParams(-1,-2).apply { topMargin=dp(12); bottomMargin=dp(8) })
+        } else {
+            chart.addView(HourlyChart(this, hourly, isDark, true))
+        }
+
+        val logCard = card()
+        val logTitle = row()
+        logTitle.addView(txt(getString(R.string.today_activity), 16f, true),
             LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-        headline.addView(txt(p.count.toString(), 42f, true, primary))
-        top.addView(headline)
-        top.addView(space(6))
-        statPair(top, getString(R.string.today), daily.toString(),
-            getString(R.string.yesterday), yesterday.toString())
-        statPair(top, getString(R.string.all_time), store.total(p.id).toString(),
-            getString(R.string.day_difference),
-            (if (daily - yesterday >= 0) "+" else "") + (daily - yesterday))
-        addAction(top, getString(R.string.edit_count), true) { editMenu() }
+        val editButton = action(getString(R.string.edit_count), { editMenu() })
+        logTitle.addView(editButton)
+        logCard.addView(logTitle)
 
-        val c = card()
-        c.addView(txt(getString(R.string.day_chart), 15f, true))
-        c.addView(BarChart(this, store.recent(p.id, 7), isDark))
-        addAction(c, getString(R.string.daily_history)) { page = 1; render() }
+        val events = store.events(project.id, date)
+        if (events.isEmpty()) {
+            logCard.addView(txt(getString(R.string.today_no_events), 13f, false, muted),
+                LinearLayout.LayoutParams(-1,-2).apply { topMargin=dp(11); bottomMargin=dp(7) })
+        } else {
+            val fmt = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
+            events.forEach { event ->
+                val isBonus = event.kind == "bonus"
+                val label = when (event.kind) {
+                    "tap" -> getString(R.string.hour_log_tap)
+                    "bonus" -> getString(R.string.hour_log_bonus)
+                    "add" -> getString(R.string.hour_log_add)
+                    "set" -> getString(R.string.hour_log_set)
+                    else -> getString(R.string.hour_log_reset)
+                }
+                val record = row().apply {
+                    setPadding(dp(6),dp(8),dp(6),dp(8))
+                    background = round(if (isBonus)
+                        (if (isDark) Color.rgb(52, 62, 73) else Color.rgb(239, 245, 255))
+                        else surface, 8)
+                }
+                val whenText = txt(fmt.format(java.util.Date(event.at)), 12f, false, muted)
+                record.addView(whenText, LinearLayout.LayoutParams(dp(75),
+                    ViewGroup.LayoutParams.WRAP_CONTENT))
+                val deltaText = (if (event.delta >= 0) "+" else "") + event.delta
+                val description = "$label  $deltaText → ${event.after}"
+                record.addView(txt(description, 13f, isBonus, if (isBonus) primary else fg),
+                    LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+                logCard.addView(record)
+                val separator = View(this).apply {
+                    setBackgroundColor(if (isDark) Color.rgb(51,60,76)
+                        else Color.rgb(234,238,246))
+                }
+                logCard.addView(separator, LinearLayout.LayoutParams(-1,dp(1)))
+            }
+        }
     }
 
     private fun showHistory() {
-        val p = store.activeProject()
-        val c = card()
-        c.addView(txt(p.name + " · " + getString(R.string.day_chart), 15f, true))
-        val selector = row().apply { setPadding(0, dp(6), 0, dp(5)) }
-        val seven = action(getString(R.string.recent_7), { days = 7; render() }, days == 7)
-        val thirty = action(getString(R.string.recent_30), { days = 30; render() }, days == 30)
-        selector.addView(seven, LinearLayout.LayoutParams(0,
-            ViewGroup.LayoutParams.WRAP_CONTENT, 1f).apply { rightMargin = dp(7) })
-        selector.addView(thirty, LinearLayout.LayoutParams(0,
-            ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-        c.addView(selector)
-        c.addView(BarChart(this, store.recent(p.id, days), isDark))
+        val project = store.activeProject()
+        val records = store.dayWindow(project.id, historyEnd, days)
+        val first = records.first().day
+        val last = records.last().day
 
-        val listCard = card()
-        listCard.addView(txt(getString(R.string.daily_history), 17f, true))
-        val records = store.recent(p.id, days).reversed()
-        for (pair in records.chunked(2)) {
-            val r = row().apply { setPadding(0, dp(2), 0, dp(2)) }
-            for ((index, record) in pair.withIndex()) {
-                val item = row().apply {
-                    setPadding(dp(8), dp(7), dp(8), dp(7))
-                    background = round(if (isDark) Color.rgb(42, 50, 67) else
-                        Color.rgb(241, 245, 251), 9)
-                }
-                val compactDate = record.day.substring(5)
-                item.addView(txt(compactDate, 12f, false, muted),
-                    LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-                item.addView(txt(record.count.toString(), 14f, true))
-                item.setOnClickListener { showDayDetails(p.id, record.day) }
-                r.addView(item, LinearLayout.LayoutParams(0,
-                    ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-                    .apply { if (index == 0) rightMargin = dp(8) })
+        val selectorCard = card()
+        val periodSelector = row().apply { setPadding(0,dp(3),0,dp(7)) }
+        val seven = action(getString(R.string.recent_7), { days=7; render() }, days==7)
+        val thirty = action(getString(R.string.recent_30), { days=30; render() }, days==30)
+        periodSelector.addView(seven, LinearLayout.LayoutParams(0,-2,1f)
+            .apply { rightMargin=dp(7) })
+        periodSelector.addView(thirty, LinearLayout.LayoutParams(0,-2,1f))
+        selectorCard.addView(periodSelector)
+        val range = txt(getString(R.string.history_date_range,first,last), 13f, false, muted)
+        range.gravity=Gravity.CENTER
+        selectorCard.addView(range)
+
+        val navigation=row().apply { setPadding(0,dp(6),0,dp(5)) }
+        val prev=action("‹ "+getString(R.string.history_before), {
+            historyEnd=historyEnd.minusDays(days.toLong()); render()
+        })
+        val jump=action(getString(R.string.history_jump), {
+            StyledDialogs.input(this, getString(R.string.history_date_format),
+                historyEnd.toString()) { typed ->
+                val selected=try { LocalDate.parse(typed,DateTimeFormatter.ISO_LOCAL_DATE) }
+                    catch (_: Exception) { null }
+                if (selected == null || selected.isAfter(LocalDate.now())) {
+                    toast(getString(R.string.history_bad_date)); false
+                } else { historyEnd=selected; render(); true }
             }
-            if (pair.size == 1) r.addView(View(this),
-                LinearLayout.LayoutParams(0, dp(1), 1f))
+        })
+        val next=action(getString(R.string.history_after)+" ›", {
+            historyEnd=historyEnd.plusDays(days.toLong()).coerceAtMost(LocalDate.now())
+            render()
+        })
+        next.isEnabled=historyEnd.isBefore(LocalDate.now())
+        next.alpha=if (next.isEnabled) 1f else 0.4f
+        navigation.addView(prev,LinearLayout.LayoutParams(0,-2,1f)
+            .apply { rightMargin=dp(6) })
+        navigation.addView(jump,LinearLayout.LayoutParams(0,-2,1.1f)
+            .apply { rightMargin=dp(6) })
+        navigation.addView(next,LinearLayout.LayoutParams(0,-2,1f))
+        selectorCard.addView(navigation)
+        selectorCard.addView(BarChart(this,records,isDark))
+
+        val listCard=card()
+        listCard.addView(txt(getString(R.string.daily_history),16f,true))
+        for (pair in records.reversed().chunked(2)) {
+            val r=row().apply { setPadding(0,dp(2),0,dp(2)) }
+            for ((index,record) in pair.withIndex()) {
+                val item=row().apply {
+                    setPadding(dp(8),dp(7),dp(8),dp(7))
+                    background=round(if (isDark) Color.rgb(42,50,67)
+                        else Color.rgb(241,245,251),9)
+                }
+                item.addView(txt(record.day,11f,false,muted),
+                    LinearLayout.LayoutParams(0,-2,1f))
+                item.addView(txt(record.count.toString(),14f,true))
+                item.setOnClickListener { showDayDetails(project.id,record.day) }
+                r.addView(item,LinearLayout.LayoutParams(0,-2,1f)
+                    .apply { if(index==0) rightMargin=dp(8) })
+            }
+            if (pair.size==1) r.addView(View(this),
+                LinearLayout.LayoutParams(0,dp(1),1f))
             listCard.addView(r)
         }
     }
@@ -457,8 +510,8 @@ class MainActivity : Activity() {
         }
         if (entryMode=="double") {
             line(mode,getString(R.string.entry_interval),
-                getString(R.string.seconds_unit,UiPrefs.int(this,"entry_interval_seconds",1))) {
-                askSettingNumber(R.string.entry_interval,"entry_interval_seconds",1,60,1)
+                getString(R.string.seconds_unit,UiPrefs.int(this,"entry_interval_seconds",5))) {
+                askSettingNumber(R.string.entry_interval,"entry_interval_seconds",1,60,5)
             }
         } else {
             line(mode,getString(R.string.periodic_interval),
