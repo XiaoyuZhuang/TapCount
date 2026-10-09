@@ -64,3 +64,10 @@ Only successfully signed builds will be uploaded as `tapcount-release-signed-apk
 The **first switch** from a v0.2.x debug APK to the new production certificate cannot be installed over the old certificate. Export a JSON backup from the old app, uninstall it, install v0.3.0 signed, then import the backup. Later signed APKs using the *same* private key can update in place.
 
 Keep the private TXT and its contents out of issues, Git commits, logs, chat screenshots, and repository files. The private key must remain private.
+
+## v0.3.1
+- Home now opens with **hourly points earned today** (first-to-last active hour with zero-filled gaps), followed by a chronological tap / bonus / edit event log.
+- Previous home multi-day chart and stacked summary cards removed. Count adjustment remains accessible in the operation log header.
+- History supports switching 7- or 30-day windows backward or forward and jumping directly to any past end date. All older day records remain in the local database.
+- Both the persistent notification and short success / reward notifications have an actionable tap target: open the management app directly on **Settings**, without incrementing the counter.
+- The default double-launch interval is again **5 seconds**, configurable in settings. Previously saved custom intervals are preserved.
