@@ -18,7 +18,7 @@ object UiPrefs {
     fun dark(ctx: Context): Boolean = when (text(ctx, "theme")) {
         "dark" -> true
         "light" -> false
-        else -> ctx.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
+        else -> (ctx.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
             Configuration.UI_MODE_NIGHT_YES
     }
 
