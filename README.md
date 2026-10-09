@@ -83,3 +83,9 @@ Keep the private TXT and its contents out of issues, Git commits, logs, chat scr
 - Added a native Android home-screen widget (1×1 minimum size), which uses a broadcast PendingIntent instead of launching an Activity. Clicking the widget counts directly with no Android SplashScreen. Counts, notification, vibration, sound, random rewards and the pinned shortcut stay synchronized.
 - The ordinary installed launcher icon and dynamically-numbered pinned shortcut still launch an Activity and may show the mandatory Android 12+ system splash on cold/warm starts; that behavior cannot reliably be eliminated by app code. For a zero-splash experience use the new widget.
 - Go to Settings → Numbered home shortcut → Add one-tap widget, or long-press the home screen and use Android's Widgets picker.
+
+## v0.3.4
+- Restored the proven v0.3.2 dialog options implementation exactly. The temporary 140ms nested-dialog delay and on-dismiss callbacks introduced in v0.3.3 have been reverted because the first-dialog disappearance was actually caused by an external automatic ad-skipping app. No changes to the original launcher activity/theme (unchanged in v0.3.2 and v0.3.3).
+- Retains the no-splash broadcast-based widget. The widget now prioritizes the **live numeric count** with +1 below, behaving visually more like a traditional numeric desktop shortcut.
+- The **numeric no-splash widget** is now the primary/recommended choice in Settings → Numeric home button; the older Activity-based pinned numeric shortcut remains optional for compatibility.
+- Android must let users approve adding a widget to the home screen. The app cannot silently replace its own installed launcher icon or automatically install a widget without launcher approval.

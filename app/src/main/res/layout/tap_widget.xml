@@ -3,26 +3,35 @@
     android:id="@+id/tap_widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:orientation="vertical"
+    android:gravity="center"
     android:padding="5dp"
     android:background="@drawable/tap_widget_bg">
+    <!-- Prioritize the current number: this is the no-splash equivalent
+         of the existing dynamic numeric shortcut. -->
+    <TextView
+        android:id="@+id/tap_widget_count"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="0"
+        android:gravity="center"
+        android:singleLine="true"
+        android:includeFontPadding="false"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="16sp"
+        android:autoSizeMaxTextSize="37sp"
+        android:autoSizeStepGranularity="1sp"
+        android:textSize="34sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFFFF"/>
     <TextView
         android:id="@+id/tap_widget_plus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="+1"
+        android:includeFontPadding="false"
         android:textStyle="bold"
-        android:textSize="25sp"
-        android:textColor="#FFFFFFFF"
-        android:gravity="center"/>
-    <TextView
-        android:id="@+id/tap_widget_count"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="0"
-        android:textSize="12sp"
+        android:textSize="11sp"
         android:textColor="#DCE6FFFF"
-        android:maxLines="1"
-        android:ellipsize="end"/>
+        android:gravity="center"/>
 </LinearLayout>

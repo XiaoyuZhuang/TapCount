@@ -1,9 +1,6 @@
 package com.xiaoyuzhuang.tapcount
 
 import android.app.Dialog
-import android.app.Activity
-import android.os.Handler
-import android.os.Looper
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
@@ -89,29 +86,12 @@ object StyledDialogs {
     fun options(ctx: Context, title: String, labels: Array<String>,
                 onPick: (Int) -> Unit) {
         val (d, root) = base(ctx,title)
-        var selectedIndex = -1
-        // Important: opening a new Dialog synchronously while the old window is
-        // being removed races Android's window-focus and dismissal lifecycle.
-        // It especially affected the first edit-count operation after a cold start.
-        d.setOnDismissListener {
-            val index = selectedIndex
-            if (index >= 0) {
-                Handler(Looper.getMainLooper()).postDelayed({
-                    val activity = ctx as? Activity
-                    if (activity == null || (!activity.isFinishing && !activity.isDestroyed)) {
-                        onPick(index)
-                    }
-                }, 140L)
-            }
-        }
         for ((i,label) in labels.withIndex()) {
             val item = text(ctx,label,15f)
             item.setPadding(dp(ctx,12),dp(ctx,11),dp(ctx,12),dp(ctx,11))
             item.background = shape(ctx,if (dark(ctx)) Color.rgb(46,55,72)
                 else Color.rgb(243,246,252),10)
-            item.setOnClickListener {
-                if (selectedIndex == -1) { selectedIndex = i; d.dismiss() }
-            }
+            item.setOnClickListener { d.dismiss(); onPick(i) }
             root.addView(item, LinearLayout.LayoutParams(-1,-2)
                 .apply { bottomMargin = dp(ctx,7) })
         }

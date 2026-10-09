@@ -48,9 +48,9 @@
     <string name="dark">Dark</string>
     <string name="chinese">简体中文</string>
     <string name="english">English</string>
-    <string name="shortcut">Numbered home shortcut</string>
+    <string name="shortcut">Numeric home button</string>
     <string name="pin_shortcut">Add number shortcut to home screen</string>
-    <string name="shortcut_explainer">The normal app icon counts immediately. To display a changing number, pin this extra shortcut once. Android launchers may delay or limit icon updates.</string>
+    <string name="shortcut_explainer">Legacy activity shortcut: the number can change but Android may show its launch animation. The numeric widget above is preferred. Launcher caching may also delay shortcut icon updates.</string>
     <string name="shortcut_unsupported">Your launcher does not support pinning shortcuts.</string>
     <string name="shortcut_requested">Follow the home screen prompt to pin the shortcut.</string>
     <string name="updates">Updates</string>
@@ -129,8 +129,9 @@
     <string name="notification_mode_permission_required">Allow notifications to activate notification-only entry. Your previous entry mode has been kept.</string>
     <string name="notification_mode_requires_persistent">Keep the ongoing notification enabled when using notification-only entry.</string>
     <string name="widget_title">TapCount one-tap button</string>
-    <string name="widget_explainer">For a truly silent tap without the Android splash screen, add this 1×1 home widget. It counts instantly, vibrates or notifies as configured, and shows the current number. It does not open the dashboard.</string>
-    <string name="pin_widget">Add one-tap widget to home screen</string>
+    <string name="widget_explainer">Recommended: a numeric home-screen widget. The large number is your current count; tapping counts +1 with no app launch animation. Dashboard access stays available from the notification. Android requires you to confirm placement once.</string>
+    <string name="pin_widget">Add numeric button (recommended, no splash)</string>
     <string name="widget_requested">Confirm the add-widget prompt on your home screen.</string>
     <string name="widget_manual">Long-press an empty home-screen area → Widgets → TapCount → drag the one-tap widget onto your desktop.</string>
+    <string name="legacy_shortcut_label">Legacy activity shortcut (optional)</string>
 </resources>

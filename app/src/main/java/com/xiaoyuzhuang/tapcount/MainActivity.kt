@@ -651,21 +651,13 @@ class MainActivity : Activity() {
                 arrayOf("system", "zh", "en"), "language")
         }
 
+        // The widget is the recommended default numeric desktop button.
+        // Android launchers must still ask the user to place it.
         val shortcut = card()
         shortcut.addView(txt(getString(R.string.shortcut), 17f, true))
         shortcut.addView(space(9))
-        shortcut.addView(txt(getString(R.string.shortcut_explainer), 12f, false, muted))
-        addAction(shortcut, getString(R.string.pin_shortcut)) {
-            val ok = Shortcuts.pin(this, store.activeProject().count)
-            toast(getString(if (ok) R.string.shortcut_requested else R.string.shortcut_unsupported))
-        }
-        addAction(shortcut, getString(R.string.refresh_shortcut)) {
-            Shortcuts.refresh(applicationContext, store.activeProject().count)
-            toast(getString(R.string.shortcut_refreshing))
-        }
-        shortcut.addView(space(9))
         shortcut.addView(txt(getString(R.string.widget_explainer), 12f, false, muted))
-        addAction(shortcut, getString(R.string.pin_widget)) {
+        addAction(shortcut, getString(R.string.pin_widget), true) {
             val manager = getSystemService(AppWidgetManager::class.java)
             if (manager.isRequestPinAppWidgetSupported) {
                 val component = ComponentName(this, TapWidgetProvider::class.java)
@@ -679,6 +671,19 @@ class MainActivity : Activity() {
             } else {
                 toast(getString(R.string.widget_manual))
             }
+        }
+        shortcut.addView(space(14))
+        shortcut.addView(txt(getString(R.string.legacy_shortcut_label), 13f, true, muted))
+        shortcut.addView(space(5))
+        shortcut.addView(txt(getString(R.string.shortcut_explainer), 12f, false, muted))
+        addAction(shortcut, getString(R.string.pin_shortcut)) {
+            val ok = Shortcuts.pin(this, store.activeProject().count)
+            toast(getString(if (ok) R.string.shortcut_requested else R.string.shortcut_unsupported))
+        }
+        addAction(shortcut, getString(R.string.refresh_shortcut)) {
+            Shortcuts.refresh(applicationContext, store.activeProject().count)
+            TapWidgetProvider.refresh(applicationContext, store.activeProject().count)
+            toast(getString(R.string.shortcut_refreshing))
         }
 
         val data = card()

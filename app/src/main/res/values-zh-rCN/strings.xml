@@ -48,9 +48,9 @@
     <string name="dark">深色</string>
     <string name="chinese">简体中文</string>
     <string name="english">English</string>
-    <string name="shortcut">桌面数字快捷方式</string>
+    <string name="shortcut">桌面数字按钮</string>
     <string name="pin_shortcut">将数字快捷方式添加到桌面</string>
-    <string name="shortcut_explainer">普通应用图标安装后即可点击计数。要在桌面图标上显示数字，需额外固定一次数字快捷方式。不同安卓桌面可能限制或延迟数字刷新。</string>
+    <string name="shortcut_explainer">传统数字快捷方式仍可使用，但点击时可能显示安卓启动动画。优先使用上面的数字小组件；部分桌面对传统快捷方式的数字更新会有延迟。</string>
     <string name="shortcut_unsupported">当前桌面启动器不支持固定快捷方式。</string>
     <string name="shortcut_requested">请按桌面弹出的提示添加数字快捷方式。</string>
     <string name="updates">软件更新</string>
@@ -129,8 +129,9 @@
     <string name="notification_mode_permission_required">需要允许通知才能使用“通过通知进入”。已保留原来的启动方式。</string>
     <string name="notification_mode_requires_persistent">使用“通过通知进入”时必须保留常驻通知。</string>
     <string name="widget_title">轻计一键计数</string>
-    <string name="widget_explainer">想要真正点击即计数、没有安卓启动动画，请添加这个桌面计数小组件。点击后按设置震动或发送通知，并显示当前数字，不会打开管理界面。</string>
-    <string name="pin_widget">添加无启动动画计数小组件</string>
+    <string name="widget_explainer">推荐使用数字小组件：大数字显示当前计数，点击直接计分，不出现应用启动动画；可从通知进入管理界面。首次需要在桌面确认添加。</string>
+    <string name="pin_widget">添加数字按钮（推荐·无启动动画）</string>
     <string name="widget_requested">请在桌面弹窗中确认添加小组件。</string>
     <string name="widget_manual">请长按桌面空白处 → 小组件 → 轻计，将一键计数组件添加到桌面。</string>
+    <string name="legacy_shortcut_label">传统快捷方式（可选）</string>
 </resources>
