@@ -24,7 +24,7 @@ Pushing a tag such as `v0.1.0` runs the workflow and publishes an APK in GitHub 
 - `TAPCOUNT_KEY_ALIAS`
 - `TAPCOUNT_KEY_PASSWORD`
 
-Without those secrets, tag builds publish **debug APKs for testing only**. GitHub-hosted runners may generate different debug signatures, so reinstalling (possibly uninstalling first) may be necessary. Keep permanent signing secrets safe and never commit the keystore.
+Without those secrets, builds upload only **debug APK artifacts for testing** and do not create official releases. GitHub-hosted runners may generate different debug signatures, so reinstalling (possibly uninstalling first) may be necessary. Keep permanent signing secrets safe and never commit the keystore.
 
 ## Privacy
 All counters and activity records live locally in SQLite. No account, analytics, or tracking. Internet access is used only on request for the GitHub Releases update check.

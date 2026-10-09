@@ -29,7 +29,7 @@ object Feedback {
     fun refreshPersistent(ctx: Context, count: Int) {
         if (!canNotify(ctx)) return
         val nm = ctx.getSystemService(NotificationManager::class.java)
-        if (!UiPrefs.bool(ctx, "persistent_notification", false)) {
+        if (!UiPrefs.bool(ctx, "persistent_notification", true)) {
             nm.cancel(TOTAL_ID)
             return
         }

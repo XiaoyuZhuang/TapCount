@@ -55,6 +55,11 @@ class MainActivity : Activity() {
         @Suppress("DEPRECATION")
         window.navigationBarColor = bg
         render()
+        if (Build.VERSION.SDK_INT < 33 ||
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED) {
+            Feedback.refreshPersistent(applicationContext,store.activeProject().count)
+        }
         // Android 13+ permission can only be requested in visible management UI,
         // never from the invisible one-tap launcher activity.
         if (Build.VERSION.SDK_INT >= 33 && UiPrefs.bool(this, "notification", true) &&
@@ -64,6 +69,14 @@ class MainActivity : Activity() {
             UiPrefs.setBool(this, "notification_permission_asked", true)
             requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 100)
         }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 100 && grantResults.any { it == PackageManager.PERMISSION_GRANTED })
+            Feedback.refreshPersistent(applicationContext,store.activeProject().count)
     }
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
@@ -255,7 +268,7 @@ class MainActivity : Activity() {
     private fun showDayDetails(projectId: Long, date: String) {
         val events = store.events(projectId, date)
         val activity = if (events.isEmpty()) getString(R.string.no_records)
-        else events.joinToString("\\n") { event ->
+        else events.joinToString("\n") { event ->
             val time = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
                 .format(java.util.Date(event.at))
             val kind = when (event.kind) {
@@ -424,7 +437,7 @@ class MainActivity : Activity() {
         }
         feedback.addView(txt(getString(R.string.auto_reset_desc), 12f, false, muted))
         switchLine(feedback,getString(R.string.persistent_notification),
-            UiPrefs.bool(this,"persistent_notification",false)) {
+            UiPrefs.bool(this,"persistent_notification",true)) {
             UiPrefs.setBool(this,"persistent_notification",it)
             Feedback.refreshPersistent(applicationContext,store.activeProject().count)
             if (it && Build.VERSION.SDK_INT >= 33 &&

@@ -144,7 +144,8 @@ object StyledDialogs {
         content.addView(text(ctx,activity,12f))
         scroll.addView(content)
         root.addView(scroll,LinearLayout.LayoutParams(-1,
-            dp(ctx, 380).coerceAtMost((ctx.resources.displayMetrics.heightPixels*0.53).toInt())))
+            dp(ctx, (220 + hourly.size * 34).coerceIn(200,380))
+                .coerceAtMost((ctx.resources.displayMetrics.heightPixels*0.53).toInt())))
         root.addView(button(ctx,ctx.getString(R.string.confirm),true) { d.dismiss() },
             LinearLayout.LayoutParams(-1,-2).apply { topMargin = dp(ctx,14) })
         open(ctx,d)
