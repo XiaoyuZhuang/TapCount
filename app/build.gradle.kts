@@ -32,7 +32,7 @@ android {
                 storeFile = file(keyPath)
                 storePassword = keyPassword
                 this.keyAlias = keyAlias
-                keyPassword = keyPass
+                this.keyPassword = keyPass
             }
         }
     }
