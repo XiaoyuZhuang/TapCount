@@ -137,7 +137,7 @@ class CounterStore(private val ctx: Context) :
     }
 
     /** One atomic transaction per physical tap; pity counts taps, NOT awarded points. */
-    fun tapActive(): TapOutcome {
+    fun tapActive(allowAutomaticEntry: Boolean = true): TapOutcome {
         val db = writableDatabase
         db.beginTransaction()
         try {
@@ -158,8 +158,8 @@ class CounterStore(private val ctx: Context) :
             val next = (p.count.toLong() + points).coerceAtMost(1_000_000_000L).toInt()
             val mode = prefs.getString("entry_mode", "double")
             val every = prefs.getInt("periodic_interval", 10).coerceIn(2, 1000)
-            val sequence = if (mode == "periodic") periodic + 1 else 0
-            val opens = mode == "periodic" && sequence >= every
+            val sequence = if (mode == "periodic" && allowAutomaticEntry) periodic + 1 else periodic
+            val opens = allowAutomaticEntry && mode == "periodic" && sequence >= every
             db.execSQL("UPDATE counter_state SET pity=?,periodic_taps=? WHERE project_id=?",
                 arrayOf(if (rewardOn) (if (won) 0 else nextPity) else pity,
                     if (opens) 0 else sequence, p.id))

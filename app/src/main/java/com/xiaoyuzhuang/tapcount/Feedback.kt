@@ -42,6 +42,8 @@ object Feedback {
             PackageManager.PERMISSION_GRANTED
 
     fun refreshPersistent(ctx: Context, count: Int) {
+        // A launcher widget can display the count even without notification permission.
+        TapWidgetProvider.refresh(ctx, count)
         if (!canNotify(ctx)) return
         val nm = ctx.getSystemService(NotificationManager::class.java)
         if (!UiPrefs.bool(ctx, "persistent_notification", true)) {

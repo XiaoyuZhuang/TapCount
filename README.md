@@ -77,3 +77,9 @@ Keep the private TXT and its contents out of issues, Git commits, logs, chat scr
 - Notification permission/availability checked before entering notification-only mode. Persistent notification is automatically enabled and cannot be disabled while notification-only mode is selected. OS-level notification blocking may still prevent access until notification permission is restored.
 - Restored compact home feedback: today, yesterday, and signed today-minus-yesterday points.
 - Display per-hour numeric points directly above each bar on the home chart, including zero-value hours. Long hourly ranges scroll horizontally to keep numbers readable.
+
+## v0.3.3
+- Fixed the first-tap nested edit menu disappearing after a cold start: the next dialog is created only after the previous dialog's dismissal lifecycle completes.
+- Added a native Android home-screen widget (1×1 minimum size), which uses a broadcast PendingIntent instead of launching an Activity. Clicking the widget counts directly with no Android SplashScreen. Counts, notification, vibration, sound, random rewards and the pinned shortcut stay synchronized.
+- The ordinary installed launcher icon and dynamically-numbered pinned shortcut still launch an Activity and may show the mandatory Android 12+ system splash on cold/warm starts; that behavior cannot reliably be eliminated by app code. For a zero-splash experience use the new widget.
+- Go to Settings → Numbered home shortcut → Add one-tap widget, or long-press the home screen and use Android's Widgets picker.

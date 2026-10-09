@@ -128,4 +128,9 @@
     <string name="notification_mode_disabled">轻计的通知已在系统中关闭。请先到安卓系统设置中允许轻计发送通知，再选择该模式；目前仍保留原来的进入方式。</string>
     <string name="notification_mode_permission_required">需要允许通知才能使用“通过通知进入”。已保留原来的启动方式。</string>
     <string name="notification_mode_requires_persistent">使用“通过通知进入”时必须保留常驻通知。</string>
+    <string name="widget_title">轻计一键计数</string>
+    <string name="widget_explainer">想要真正点击即计数、没有安卓启动动画，请添加这个桌面计数小组件。点击后按设置震动或发送通知，并显示当前数字，不会打开管理界面。</string>
+    <string name="pin_widget">添加无启动动画计数小组件</string>
+    <string name="widget_requested">请在桌面弹窗中确认添加小组件。</string>
+    <string name="widget_manual">请长按桌面空白处 → 小组件 → 轻计，将一键计数组件添加到桌面。</string>
 </resources>

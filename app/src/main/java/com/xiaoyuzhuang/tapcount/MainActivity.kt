@@ -2,6 +2,8 @@ package com.xiaoyuzhuang.tapcount
 
 import android.Manifest
 import android.app.Activity
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.app.NotificationManager
 import android.app.AlertDialog
 import android.content.Context
@@ -660,6 +662,23 @@ class MainActivity : Activity() {
         addAction(shortcut, getString(R.string.refresh_shortcut)) {
             Shortcuts.refresh(applicationContext, store.activeProject().count)
             toast(getString(R.string.shortcut_refreshing))
+        }
+        shortcut.addView(space(9))
+        shortcut.addView(txt(getString(R.string.widget_explainer), 12f, false, muted))
+        addAction(shortcut, getString(R.string.pin_widget)) {
+            val manager = getSystemService(AppWidgetManager::class.java)
+            if (manager.isRequestPinAppWidgetSupported) {
+                val component = ComponentName(this, TapWidgetProvider::class.java)
+                try {
+                    val accepted = manager.requestPinAppWidget(component, null, null)
+                    toast(getString(if (accepted) R.string.widget_requested
+                        else R.string.widget_manual))
+                } catch (_: Exception) {
+                    toast(getString(R.string.widget_manual))
+                }
+            } else {
+                toast(getString(R.string.widget_manual))
+            }
         }
 
         val data = card()
