@@ -472,6 +472,7 @@ class MainActivity : Activity() {
             days = 7
             historyEnd = LocalDate.now()
             page = 0
+            intent?.removeExtra("open_settings")
             // Delay theme/language recreation until confirmation dialog has closed.
             window.decorView.post { recreate() }
             toast(getString(R.string.all_data_deleted))
