@@ -95,3 +95,7 @@ Keep the private TXT and its contents out of issues, Git commits, logs, chat scr
 - Retains double-tap (5 s default), every N taps, and notification-only modes; notification and no-splash numeric widget entries remain supported. The widget always counts without displaying management.
 - Added a compact **Delete** action beside Home → Today activity. It atomically deletes all of today's events and daily total for the active project, resets its current score to zero and its reward/periodic progress; older days and other projects are preserved. This is not the existing logged Reset operation.
 - Added **Clear all data** under Settings → Data. Confirmed factory reset removes every project, folder, historical event, score, reward state, and SharedPreferences setting; recreates the default folder/project; refreshes widget, shortcut, and persistent notification. External backups remain unaffected. Export a JSON backup before using this irreversible operation.
+
+## v0.3.6
+- Finalizes the v0.3.5 reset and default-entry changes: after factory reset, clear any stale notification-driven Settings navigation so the restored application presents its initial Home screen.
+- This version supersedes the first v0.3.5 CI build, which was published just before the follow-up safety fix finished.
