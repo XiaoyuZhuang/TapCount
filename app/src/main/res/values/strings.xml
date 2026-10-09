@@ -107,4 +107,21 @@
     <string name="hourly_values">%1$d taps · +%2$d points</string>
     <string name="activity_details">Event details</string>
     <string name="range_error">Enter an integer from %1$d to %2$d</string>
+    <string name="today_hour_points">Points earned by hour today</string>
+    <string name="today_activity">Today activity</string>
+    <string name="hour_log_tap">Tap recorded</string>
+    <string name="hour_log_bonus">Lucky reward</string>
+    <string name="hour_log_add">Manual adjustment</string>
+    <string name="hour_log_set">Set count</string>
+    <string name="hour_log_reset">Count reset</string>
+    <string name="log_total">Now %1$d</string>
+    <string name="log_gain">+%1$d</string>
+    <string name="history_before">Previous</string>
+    <string name="history_after">Next</string>
+    <string name="history_jump">Jump to date</string>
+    <string name="history_date_format">End date (YYYY-MM-DD)</string>
+    <string name="history_bad_date">Please enter a valid date no later than today.</string>
+    <string name="history_date_range">%1$s – %2$s</string>
+    <string name="history_to_today">Return to today</string>
+    <string name="today_no_events">No events yet today</string>
 </resources>

@@ -189,11 +189,14 @@ class CounterStore(private val ctx: Context) :
         readableDatabase.rawQuery("SELECT COALESCE(SUM(count),0) FROM daily WHERE project_id=?",
             arrayOf(id.toString())).use { c -> return if (c.moveToFirst()) c.getLong(0) else 0L }
     }
-    fun recent(id: Long, count: Int): List<DayScore> =
-        (count - 1 downTo 0).map {
-            val date = LocalDate.now().minusDays(it.toLong()).toString()
+    /** Any historical window, not just the last 7 or 30 days. */
+    fun dayWindow(id: Long, end: LocalDate, count: Int): List<DayScore> =
+        (count - 1 downTo 0).map { offset ->
+            val date = end.minusDays(offset.toLong()).toString()
             DayScore(date, dailyCount(id, date))
         }
+    fun recent(id: Long, count: Int): List<DayScore> =
+        dayWindow(id, LocalDate.now(), count)
     fun events(id: Long, date: String): List<CounterEvent> {
         val list = mutableListOf<CounterEvent>()
         readableDatabase.rawQuery(

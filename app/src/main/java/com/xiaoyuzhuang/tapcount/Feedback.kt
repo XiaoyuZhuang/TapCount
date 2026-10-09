@@ -2,6 +2,8 @@ package com.xiaoyuzhuang.tapcount
 
 import android.Manifest
 import android.app.Notification
+import android.app.PendingIntent
+import android.content.Intent
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -20,6 +22,19 @@ object Feedback {
     private const val BONUS = "tapcount_bonus_v1"
     private const val TOTAL = "tapcount_total_v1"
     private const val TOTAL_ID = 501
+
+    /** Both short and ongoing notifications open Settings directly. */
+    private fun settingsIntent(ctx: Context): PendingIntent {
+        val intent = Intent(ctx, MainActivity::class.java).apply {
+            putExtra("open_settings", true)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or
+                Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        }
+        return PendingIntent.getActivity(
+            ctx, 701, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
 
     private fun canNotify(ctx: Context) =
         Build.VERSION.SDK_INT < 33 ||
@@ -42,6 +57,7 @@ object Feedback {
             .setContentTitle(ctx.getString(R.string.app_name))
             .setContentText(ctx.getString(R.string.persistent_count, count))
             .setOngoing(true).setOnlyAlertOnce(true)
+            .setContentIntent(settingsIntent(ctx))
             .setCategory(Notification.CATEGORY_STATUS)
             .build()
         nm.notify(TOTAL_ID, n)
@@ -92,6 +108,7 @@ object Feedback {
                 .setContentTitle(ctx.getString(if (rewarded) R.string.bonus_title else R.string.count_success))
                 .setContentText(text)
                 .setAutoCancel(true).setOngoing(false)
+                .setContentIntent(settingsIntent(ctx))
                 .setOnlyAlertOnce(false).setTimeoutAfter(if (rewarded) 6500L else 4500L)
                 .setPriority(Notification.PRIORITY_HIGH).build()
             val prefs = ctx.getSharedPreferences("tapcount", Context.MODE_PRIVATE)

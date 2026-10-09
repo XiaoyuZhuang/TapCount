@@ -26,7 +26,7 @@ class LaunchActivity : Activity() {
         val mode = prefs.getString("entry_mode", "double")
         val now = SystemClock.elapsedRealtime()
         val previous = prefs.getLong("last_launch_elapsed", 0L)
-        val interval = prefs.getInt("entry_interval_seconds", 1).coerceIn(1, 60) * 1_000L
+        val interval = prefs.getInt("entry_interval_seconds", 5).coerceIn(1, 60) * 1_000L
         if (mode != "periodic" && previous > 0L && now >= previous && now - previous < interval) {
             prefs.edit().putLong("last_launch_elapsed", 0L).commit()
             openDashboard()

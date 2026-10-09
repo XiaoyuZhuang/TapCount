@@ -107,4 +107,21 @@
     <string name="hourly_values">%1$d 次 · +%2$d 分</string>
     <string name="activity_details">操作记录</string>
     <string name="range_error">请输入 %1$d～%2$d 之间的整数</string>
+    <string name="today_hour_points">今天每小时获得积分</string>
+    <string name="today_activity">今日操作记录</string>
+    <string name="hour_log_tap">点击计数</string>
+    <string name="hour_log_bonus">随机奖励</string>
+    <string name="hour_log_add">手动调整</string>
+    <string name="hour_log_set">设置计数</string>
+    <string name="hour_log_reset">清零</string>
+    <string name="log_total">当前 %1$d</string>
+    <string name="log_gain">＋%1$d</string>
+    <string name="history_before">上一段</string>
+    <string name="history_after">下一段</string>
+    <string name="history_jump">选择日期</string>
+    <string name="history_date_format">截止日期（年-月-日）</string>
+    <string name="history_bad_date">请输入有效且不晚于今天的日期。</string>
+    <string name="history_date_range">%1$s ～ %2$s</string>
+    <string name="history_to_today">返回今天</string>
+    <string name="today_no_events">今天还没有操作记录</string>
 </resources>
