@@ -97,7 +97,7 @@ class MainActivity : Activity() {
             setOnClickListener { onClick() }
         }
 
-    private fun addAction(holder: LinearLayout, label: String, onClick: () -> Unit, emphasized: Boolean = false) {
+    private fun addAction(holder: LinearLayout, label: String, emphasized: Boolean = false, onClick: () -> Unit) {
         holder.addView(action(label, onClick, emphasized),
             LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT).apply { topMargin = dp(10) })
@@ -175,13 +175,13 @@ class MainActivity : Activity() {
         line(top, getString(R.string.yesterday), yesterday.toString())
         line(top, getString(R.string.all_time), store.total(p.id).toString())
         line(top, getString(R.string.compared_yesterday, daily - yesterday), "")
-        addAction(top, getString(R.string.edit_count), { editMenu() }, true)
+        addAction(top, getString(R.string.edit_count), true) { editMenu() }
 
         val c = card()
         c.addView(txt(getString(R.string.day_chart), 17f, true))
         c.addView(space(12))
         c.addView(BarChart(this, store.recent(p.id, 7), isDark))
-        addAction(c, getString(R.string.daily_history), { page = 1; render() })
+        addAction(c, getString(R.string.daily_history)) { page = 1; render() }
         val intro = card()
         intro.addView(txt(getString(R.string.quick_guide), 13f, false, muted))
     }
