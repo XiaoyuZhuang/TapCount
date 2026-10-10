@@ -1,101 +1,122 @@
 # 轻计 TapCount
 
-**One tap. One small win.** A lightweight offline Android counter that records a small achievement every time you launch it.
+**轻轻一点，积少成多。**
 
-## Features
-- Tap the app icon to increment the active project's count and return to the launcher.
-- Tap the icon again within 5 seconds to open the dashboard, without an extra increment.
-- Daily totals, yesterday's comparison, 7/30-day bar charts and activity history.
-- Folders, independent named projects, manual adjustments and daily reset with retained history.
-- Optional vibration, sound and notifications.
-- Light/dark/system themes; English, Simplified Chinese, or system language.
-- Data export/import (JSON) and GitHub Releases update check.
-- Optional **pinned numeric shortcut** updated using Android ShortcutManager.
+[English README](./README.en.md) · [下载最新版 APK](https://github.com/XiaoyuZhuang/TapCount/releases/latest) · [反馈问题](https://github.com/XiaoyuZhuang/TapCount/issues)
 
-**Android limitation:** Normal launcher app icons cannot be rewritten to arbitrary numbers. TapCount's regular icon counts immediately after installation. Pin the optional numeric shortcut once from Settings to display a mutable count icon. Launcher caches and Android rate limits mean **not every tap can be reflected instantly**; counting itself is always saved.
+轻计是一款开源、离线优先的 Android 自律计数工具。它不替你规划人生，也不要求你每天填写复杂的计划：**完成一件自己认可的小事，就给自己记一次分。**
 
-## Build with GitHub Actions
-Open [Actions](https://github.com/XiaoyuZhuang/TapCount/actions). Each push to main builds an installable **debug APK**, downloadable from the **tapcount-debug-apk** artifact. No local Android installation is needed.
+它可以是背完一组单词、完成一轮专注学习、做完一组训练，或者终于开始处理一项拖延已久的任务。轻计想做的，就是让这些不起眼的行动被看见。
 
-## Releases and signatures
-Pushing a tag such as `v0.1.0` runs the workflow and publishes an APK in GitHub Releases. For installable updates across versions, set a permanent release signing key in GitHub Actions secrets:
-- `TAPCOUNT_KEYSTORE_BASE64` - base64 of the Java Keystore (.jks).
-- `TAPCOUNT_KEYSTORE_PASSWORD`
-- `TAPCOUNT_KEY_ALIAS`
-- `TAPCOUNT_KEY_PASSWORD`
+## 为什么做这个软件？
 
-Without those secrets, builds upload only **debug APK artifacts for testing** and do not create official releases. GitHub-hosted runners may generate different debug signatures, so reinstalling (possibly uninstalling first) may be necessary. Keep permanent signing secrets safe and never commit the keystore.
+我一直觉得，自律最难的部分，往往不是不知道应该做什么，而是**知道，却迟迟无法开始；开始了，又很难坚持**。
 
-## Privacy
-All counters and activity records live locally in SQLite. No account, analytics, or tracking. Internet access is used only on request for the GitHub Releases update check.
+很多效率工具提供日程、提醒、目标和漂亮的统计，但当记录本身也变成一项任务时，就可能带来额外负担。我更想要一个简单到几乎不需要思考的工具：**做完一件事，点一下；继续做下一件事。**
 
-## Requirements
-Android 8.0+ (API 26). Kotlin and Android Gradle Plugin, built with JDK 17.
+这就是轻计的出发点。它不是用来证明自己每天有多努力，而是给自己的行动留下一份看得见的记录。哪怕今天只有一次，也比因为追求完美而完全不开始更有意义。
 
-## Notes
-Android 12+ can show a short system splash when launching the app even though the app itself doesn't present a counting screen. Different launchers may also update numeric shortcut icons at different rates.
+## 它为什么可能帮助自律？
 
-## v0.2.0 fix release
-- Separate no-UI counter task: standard launcher icon and number shortcut both increment and finish immediately, except second tap in five seconds to open management.
-- Static +1 launcher icon; live numeric count is available via pinned shortcut only. Android does not allow the normal installed launcher icon to change arbitrarily.
-- Configurable 65ms vibration, tone and high-importance short-lived notifications. System permission and phone notification channel settings determine whether a heads-up banner appears.
-- Two-column statistics and compact daily history.
-- Before updating a v0.1.0 debug APK, export a JSON backup from Settings. Runner-generated debug signing certificates may vary; uninstalling the old build deletes its local data.
+轻计的思路可以概括为一个简单的循环：
 
-## v0.3.0
-- Modern rounded theme-aware dialogs and hourly breakdown (first recorded hour to last, zero-filled gaps).
-- Adjustable double-launch window (1–60 seconds, default 1 second).
-- Optional continuous counting mode (open dashboard after every Nth tap, N = 2–1000); all taps count.
-- Random reward draws with 1/N per-tap probability, a guaranteed win on the Nth unsuccessful tap, configurable N and reward points, and a distinct double-vibration/notification.
-- Optional low-priority ongoing notification showing the current counter, updated when the counter changes.
-- Persistent reward/periodic state stored in SQLite; v0.2.x data upgraded in place when signatures match.
+**确定一个小行动 → 完成它 → 点击计数 → 得到即时反馈 → 看见长期积累。**
 
-## Private signing (IMPORTANT)
-The signing keystore is intentionally **not committed**. The owner holds a private TXT containing a base64 PKCS12 keystore and its passwords.
-Go to **Settings → Secrets and variables → Actions → New repository secret**, and create:
-- `TAPCOUNT_KEYSTORE_BASE64`
-- `TAPCOUNT_KEYSTORE_PASSWORD`
-- `TAPCOUNT_KEY_ALIAS`
-- `TAPCOUNT_KEY_PASSWORD`
+- **降低开始的门槛**：与其想着“今天必须学习三个小时”，不如先约定“完成一段 20～25 分钟的专注学习，就记 1 分”。目标更具体，也更容易迈出第一步。
+- **让行动得到即时反馈**：计数、震动、通知和积分变化，能让一次小小的完成不再悄无声息。反馈不是目的，而是提醒自己：刚才确实做成了一件事。
+- **让进步可见**：首页可以看到今天比昨天多了多少分、每个小时获得多少分，以及具体做过哪些计数操作；历史页则能回看更长时间的记录。
+- **尽量减少记录成本**：不用打开表格、填写文字或反复进入页面。添加桌面数字小组件后，点一下就能记分，不需要启动管理界面。
+- **给坚持一点乐趣**：可选的随机奖励会偶尔增加额外积分，让重复的小行动多一点惊喜。
 
-Once all four are configured, go to **Actions → Build Android APK → Run workflow (main)**.
-Only successfully signed builds will be uploaded as `tapcount-release-signed-apk` and published in GitHub Releases. No debug APK is published as an official release when secrets are absent.
+当然，**积分不等于真正的成长**。计数本身不会自动带来好习惯，随机奖励也不能代替明确的目标。真正有效的做法是：只在完成事先约定的行动后计数，并根据自己的情况调整目标，而不是为了数字去刷点击。
 
-The **first switch** from a v0.2.x debug APK to the new production certificate cannot be installed over the old certificate. Export a JSON backup from the old app, uninstall it, install v0.3.0 signed, then import the backup. Later signed APKs using the *same* private key can update in place.
+## 怎样开始使用？
 
-Keep the private TXT and its contents out of issues, Git commits, logs, chat screenshots, and repository files. The private key must remain private.
+### 1. 安装并完成第一次计数
 
-## v0.3.1
-- Home now opens with **hourly points earned today** (first-to-last active hour with zero-filled gaps), followed by a chronological tap / bonus / edit event log.
-- Previous home multi-day chart and stacked summary cards removed. Count adjustment remains accessible in the operation log header.
-- History supports switching 7- or 30-day windows backward or forward and jumping directly to any past end date. All older day records remain in the local database.
-- Both the persistent notification and short success / reward notifications have an actionable tap target: open the management app directly on **Settings**, without incrementing the counter.
-- The default double-launch interval is again **5 seconds**, configurable in settings. Previously saved custom intervals are preserved.
+前往 [GitHub Releases](https://github.com/XiaoyuZhuang/TapCount/releases/latest) 下载并安装 APK（Android 8.0 及以上）。
 
-## v0.3.2
-- Added third launch entry mode, **Via notification**: app and numeric shortcut taps always count, including rapid successive taps. Only tapping a notification opens the management Settings screen. Double-tap and every-N shortcuts are disabled in this mode.
-- Notification permission/availability checked before entering notification-only mode. Persistent notification is automatically enabled and cannot be disabled while notification-only mode is selected. OS-level notification blocking may still prevent access until notification permission is restored.
-- Restored compact home feedback: today, yesterday, and signed today-minus-yesterday points.
-- Display per-hour numeric points directly above each bar on the home chart, including zero-value hours. Long hourly ranges scroll horizontally to keep numbers readable.
+新安装时，默认采用 **「点击图标进入」** 模式：点击一次应用图标，完成一次计数，然后进入管理界面。你可以在 **设置 → 进入界面方式** 改成自己喜欢的操作方式。已有用户升级时，原先保存的方式不会被强制覆盖。
 
-## v0.3.3
-- Fixed the first-tap nested edit menu disappearing after a cold start: the next dialog is created only after the previous dialog's dismissal lifecycle completes.
-- Added a native Android home-screen widget (1×1 minimum size), which uses a broadcast PendingIntent instead of launching an Activity. Clicking the widget counts directly with no Android SplashScreen. Counts, notification, vibration, sound, random rewards and the pinned shortcut stay synchronized.
-- The ordinary installed launcher icon and dynamically-numbered pinned shortcut still launch an Activity and may show the mandatory Android 12+ system splash on cold/warm starts; that behavior cannot reliably be eliminated by app code. For a zero-splash experience use the new widget.
-- Go to Settings → Numbered home shortcut → Add one-tap widget, or long-press the home screen and use Android's Widgets picker.
+### 2. 给自己定一条简单的计分规则
 
-## v0.3.4
-- Restored the proven v0.3.2 dialog options implementation exactly. The temporary 140ms nested-dialog delay and on-dismiss callbacks introduced in v0.3.3 have been reverted because the first-dialog disappearance was actually caused by an external automatic ad-skipping app. No changes to the original launcher activity/theme (unchanged in v0.3.2 and v0.3.3).
-- Retains the no-splash broadcast-based widget. The widget now prioritizes the **live numeric count** with +1 below, behaving visually more like a traditional numeric desktop shortcut.
-- The **numeric no-splash widget** is now the primary/recommended choice in Settings → Numeric home button; the older Activity-based pinned numeric shortcut remains optional for compatibility.
-- Android must let users approve adding a widget to the home screen. The app cannot silently replace its own installed launcher icon or automatically install a widget without launcher approval.
+建议先只选一件想坚持的事，并把计分条件说清楚。例如：
 
-## v0.3.5
-- New default entry mode: **Tap icon to open** — launching the normal app icon or existing Activity shortcut counts one tap, then opens the management screen. Existing manually saved entry modes remain unchanged on upgrade.
-- Retains double-tap (5 s default), every N taps, and notification-only modes; notification and no-splash numeric widget entries remain supported. The widget always counts without displaying management.
-- Added a compact **Delete** action beside Home → Today activity. It atomically deletes all of today's events and daily total for the active project, resets its current score to zero and its reward/periodic progress; older days and other projects are preserved. This is not the existing logged Reset operation.
-- Added **Clear all data** under Settings → Data. Confirmed factory reset removes every project, folder, historical event, score, reward state, and SharedPreferences setting; recreates the default folder/project; refreshes widget, shortcut, and persistent notification. External backups remain unaffected. Export a JSON backup before using this irreversible operation.
+| 想培养的习惯 | 什么时候记 1 次？ |
+| --- | --- |
+| 学习或工作 | 完成一轮自己设定的专注时段 |
+| 英语 | 完成一组单词复习或一篇听力练习 |
+| 运动 | 完成一组训练或一次规定的运动 |
+| 阅读 | 认真读完约定的页数 |
+| 克服拖延 | 真正开始并完成一个可验证的小步骤 |
 
-## v0.3.6
-- Finalizes the v0.3.5 reset and default-entry changes: after factory reset, clear any stale notification-driven Settings navigation so the restored application presents its initial Home screen.
-- This version supersedes the first v0.3.5 CI build, which was published just before the follow-up safety fix finished.
+**关键不是让积分越多越好，而是让每一分都对应一次真实行动。** 如果不同任务差别很大，可以在「项目」页创建不同项目，分别计数。
+
+### 3. 推荐使用无启动动画的桌面数字按钮
+
+打开 **设置 → 桌面数字按钮 → 添加数字按钮（推荐·无启动动画）**，按安卓桌面的提示添加小组件。
+
+- 小组件上会显示当前数字；点击后直接记录一次计数。
+- 点击小组件**不会自动打开管理界面**，也不会触发普通图标的启动动画。
+- 需要查看统计或改设置时，可以点击常驻通知进入管理界面；也可以使用下面的其他入口方式。
+- 传统的动态数字快捷方式也保留了，但它仍要启动 Activity，可能出现 Android 系统启动动画。
+
+小组件需要你首次确认放置，应用无法私自替换桌面原有图标。桌面启动器也可能影响组件尺寸及外观。
+
+### 4. 按习惯选择进入界面的方式
+
+在 **设置 → 启动方式 → 进入界面方式** 中，可选：
+
+| 方式 | 行为 |
+| --- | --- |
+| 点击图标进入（新用户默认） | 点击普通应用图标：先计数，再进入管理界面 |
+| 间隔双击 | 第一次计数；在设定间隔内第二次点击进入界面（第二次不重复计分） |
+| 每 N 次点击进入 | 每次都计数；第 N 次计数后同时打开管理界面 |
+| 通过通知进入 | 点击普通图标只计数，通过常驻通知打开设置 |
+
+**无动画数字小组件始终只负责计数**，不受这些自动进入规则影响。在通知模式下，请保持应用通知权限及常驻通知可用，以免找不到管理入口。
+
+### 5. 看反馈，而不是盯着数字焦虑
+
+- **首页**：查看今天 / 昨天 / 差值、今天每小时获得的积分柱状图，以及当天的操作记录。
+- **历史**：切换近 7 天、近 30 天，向前翻页或指定日期；点击某一天查看分时图和操作明细。
+- **项目**：为学习、运动、阅读等建立不同项目或文件夹，切换当前计数目标。
+- **设置**：按需要打开震动、声音、通知、每日自动归零以及随机奖励。
+
+随机奖励为**可选功能**：设置保底次数 N 和奖励分值后，每次计数有约 1/N 的中奖机会，连续未中奖到第 N 次时必定触发；获奖只重置抽奖进度，不会清除已经获得的积分。
+
+## 我推荐的一种自律用法
+
+先试用七天，不追求高分：
+
+1. 选择一个最想坚持的习惯，写下“什么算完成一次”。
+2. 把数字小组件放在桌面容易看到、也方便点击的位置。
+3. **先完成行动，再点一下**；当天少做了，不需要补点凑数。
+4. 晚上花半分钟看看哪几个小时最容易完成行动，以及今天和昨天的差异。
+5. 一周后根据真实情况调整行动难度，而不是单纯提高计数目标。
+
+如果有一天状态不好，只完成了一次，那一次也值得记录。轻计想鼓励的不是无休止地追求更多，而是**能够开始，并且愿意一次次重新开始**。
+
+## 数据、安全与隐私
+
+- **本地保存**：项目、积分、随机奖励进度及操作记录保存在设备本地的 SQLite 数据库中。无需注册账号，不集成分析追踪服务。
+- **联网用途**：手动检查版本更新时会访问 GitHub Releases；正常计数无需联网。
+- **数据备份**：在设置中导出或导入 JSON 备份。导入会替换当前数据，请先确认备份内容。
+- **清空今天**：首页「今日操作记录」旁的「删除」会清空当前项目的当天记录和积分，并将当前计数归零；以前的日期及其他项目保留。
+- **恢复初始化**：设置中的「清除所有数据」会移除所有本地项目、记录及设置，无法撤销；请先导出备份。
+
+> 请注意：卸载应用或清除应用存储也可能造成数据丢失。重要记录建议定期导出 JSON 文件并妥善保存。
+
+## 下载、构建与反馈
+
+- **下载正式版**：[最新 GitHub Release](https://github.com/XiaoyuZhuang/TapCount/releases/latest)
+- **构建记录**：[GitHub Actions](https://github.com/XiaoyuZhuang/TapCount/actions)
+- **反馈问题或建议**：[GitHub Issues](https://github.com/XiaoyuZhuang/TapCount/issues)
+
+项目使用 Kotlin 开发，最低支持 Android 8.0（API 26）；开发构建使用 JDK 17 与 Gradle。每次推送到 `main` 分支会触发 CI 编译。正式安装包使用固定的私有签名证书，签名密钥不包含在仓库中。
+
+---
+
+**轻轻一点，积少成多。**
+
+希望轻计能帮你把注意力从“我还没有成为理想中的自己”，转向“今天，我确实完成了一件小事”。
